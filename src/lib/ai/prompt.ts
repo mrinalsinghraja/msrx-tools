@@ -26,6 +26,41 @@ export function presetQuestions(tool: ToolSpec): string[] {
   return presets;
 }
 
+/**
+ * Describes the controls the visitor actually sees.
+ *
+ * Without this the model invents plausible ones — it confidently described
+ * dragging thumbnails to reorder a merge, a feature this site does not have.
+ * Everything the assistant says about the interface has to come from here.
+ */
+function describeWorkspace(tool: ToolSpec): string {
+  if (tool.io === "text") return "one box the visitor pastes text into, and the result appears below as they type. There is a Copy button and a Download button on the result.";
+  if (tool.io === "form") return "a short form of options on the right; the result appears immediately and updates as options change. There is a Copy button and a Download button on the result.";
+
+  const accepted = tool.accepts?.ext.map((extension) => `.${extension}`).join(", ") ?? "files";
+  const parts = [
+    `a drop zone that accepts ${accepted}, plus a "Choose file" button — dropping and picking both work`,
+    `files appear in a list below the drop zone, each with a bin icon to remove it`,
+  ];
+
+  if (tool.accepts?.multiple) {
+    // The order controls are up and down arrows on each row. There is no drag
+    // and drop and there are no page thumbnails; do not let the model claim so.
+    parts.push(
+      "when more than one file is added, each row has an up arrow and a down arrow to change its position — the tool processes files in the order shown. There is no drag and drop, and no page thumbnails or page preview anywhere on this site",
+    );
+  }
+
+  parts.push(
+    `a button labelled "${tool.title}" runs it, a progress bar shows how far along it is, and the results appear underneath with a Download button each`,
+  );
+  if (tool.output?.cardinality === "per-file") {
+    parts.push("when there are several results, a \"Download all as ZIP\" button appears");
+  }
+
+  return parts.join("; ");
+}
+
 function describeOptions(tool: ToolSpec): string {
   if (tool.options.length === 0) return "This tool has no options to configure.";
 
@@ -71,13 +106,7 @@ THE TOOL
 Name: ${tool.title}
 Category: ${category.title}
 Summary: ${tool.short}
-Workspace: ${
-    tool.io === "file"
-      ? "the visitor drops files in and gets files back"
-      : tool.io === "text"
-        ? "the visitor pastes text in and gets text back"
-        : "the visitor fills in a short form and gets a result"
-  }
+Workspace: ${describeWorkspace(tool)}
 
 ITS OPTIONS
 ${describeOptions(tool)}

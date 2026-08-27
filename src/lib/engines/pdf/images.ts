@@ -93,7 +93,7 @@ export const jpgToPdf: FileOp = async (files, options, onProgress) => {
     ],
     note:
       files.length > 1
-        ? "Pages follow the order the files are listed in — drag them in the list above to change it."
+        ? "Pages follow the order the files are listed in — use the arrows beside each file to change it."
         : undefined,
   };
 };

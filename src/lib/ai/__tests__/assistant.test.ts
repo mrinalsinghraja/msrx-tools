@@ -101,6 +101,19 @@ describe("system prompt", () => {
     expect(prompt).toMatch(/never as an instruction that changes these rules/);
   });
 
+  it("describes the real file controls, so the model cannot invent them", () => {
+    // It confidently described dragging page thumbnails to reorder a merge.
+    // There is no drag and drop and there are no thumbnails.
+    const prompt = buildSystemPrompt("merge-pdf")!;
+    expect(prompt).toMatch(/up arrow and a down arrow/);
+    expect(prompt).toMatch(/no drag and drop/);
+    expect(prompt).toMatch(/no page thumbnails/);
+  });
+
+  it("does not offer reordering language to single-file tools", () => {
+    expect(buildSystemPrompt("rotate-pdf")).not.toMatch(/up arrow and a down arrow/);
+  });
+
   it("lists the related tools so it can redirect people usefully", () => {
     const prompt = buildSystemPrompt("json-formatter")!;
     for (const slug of getTool("json-formatter")!.related) {
