@@ -47,6 +47,8 @@ export default function HomePage() {
               icon={CloudOff}
               title="No upload"
               body="Files are read by your own browser. Nothing is transmitted, so nothing can leak."
+              href="/privacy"
+              linkText="Read the privacy notice"
             />
             <Promise
               icon={Lock}
@@ -117,10 +119,14 @@ function Promise({
   icon: Icon,
   title,
   body,
+  href,
+  linkText,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   body: string;
+  href?: string;
+  linkText?: string;
 }) {
   return (
     <div>
@@ -128,7 +134,18 @@ function Promise({
         <Icon className="size-4 text-accent-ink" aria-hidden />
         {title}
       </dt>
-      <dd className="mt-2 text-[13px] leading-relaxed text-ink-soft">{body}</dd>
+      <dd className="mt-2 text-[13px] leading-relaxed text-ink-soft">
+        {body}
+        {href && linkText ? (
+          <>
+            {" "}
+            <Link href={href} className="text-accent-ink underline-offset-4 hover:underline">
+              {linkText}
+            </Link>
+            .
+          </>
+        ) : null}
+      </dd>
     </div>
   );
 }

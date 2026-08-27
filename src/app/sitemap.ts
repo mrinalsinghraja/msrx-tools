@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { LEGAL_DOCUMENTS } from "@/lib/legal";
 import { SITE } from "@/lib/site";
 import { CATEGORIES } from "@/lib/tools/categories";
 import { TOOLS, categoryHref, toolHref } from "@/lib/tools/registry";
@@ -16,6 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    ...LEGAL_DOCUMENTS.map((document) => ({
+      url: `${SITE.url}/${document.slug}`,
+      lastModified: now,
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
     })),
     ...TOOLS.map((tool) => ({
       url: `${SITE.url}${toolHref(tool)}`,

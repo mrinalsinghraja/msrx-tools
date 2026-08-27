@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import logo from "@/../public/brand/msrx-tools-logo.png";
+import { LEGAL_DOCUMENTS } from "@/lib/legal";
 import { SITE } from "@/lib/site";
 import { CATEGORIES } from "@/lib/tools/categories";
 import { TOOL_COUNT, toolsInCategory } from "@/lib/tools/registry";
@@ -49,7 +50,22 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <p className="mt-10 border-t border-line pt-6 text-xs text-ink-faint">
+        <nav aria-label="Site information" className="mt-10 border-t border-line pt-6">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+            {LEGAL_DOCUMENTS.map((document) => (
+              <li key={document.slug}>
+                <Link
+                  href={`/${document.slug}`}
+                  className="text-[13px] text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline"
+                >
+                  {document.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <p className="mt-6 text-xs text-ink-faint">
           © {new Date().getFullYear()} {SITE.brand}. Built for people who would rather not upload
           their files to a stranger.
         </p>
