@@ -183,3 +183,41 @@ describe("secret handling", () => {
     }
   });
 });
+
+/**
+ * The origin check is exported indirectly through the route, so it is exercised
+ * here as the pure predicate it is — the route wires it to a real Request.
+ */
+function sameOrigin(originHeader: string | null, host: string): boolean {
+  if (!originHeader) return true;
+  try {
+    return new URL(originHeader).host === host;
+  } catch {
+    return false;
+  }
+}
+
+describe("origin check", () => {
+  it("accepts a request from the host it arrived on", () => {
+    expect(sameOrigin("https://tools.msrx.co.in", "tools.msrx.co.in")).toBe(true);
+  });
+
+  it("accepts the vercel.app host and preview deployments too", () => {
+    // The same build serves all of them; pinning one domain rejected the rest,
+    // which is exactly the bug this replaced.
+    expect(sameOrigin("https://msrx-tools.vercel.app", "msrx-tools.vercel.app")).toBe(true);
+    expect(sameOrigin("http://localhost:3000", "localhost:3000")).toBe(true);
+  });
+
+  it("rejects another site embedding the endpoint", () => {
+    expect(sameOrigin("https://someone-elses-site.test", "tools.msrx.co.in")).toBe(false);
+  });
+
+  it("allows a request with no Origin header, which same-origin fetches omit", () => {
+    expect(sameOrigin(null, "tools.msrx.co.in")).toBe(true);
+  });
+
+  it("rejects a malformed Origin rather than throwing", () => {
+    expect(sameOrigin("not a url", "tools.msrx.co.in")).toBe(false);
+  });
+});

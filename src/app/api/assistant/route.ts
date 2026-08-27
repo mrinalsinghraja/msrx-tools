@@ -1,7 +1,6 @@
 import { ANSWER_MODEL, getGroq, hasKey, looksLikeInjection, MissingKeyError } from "@/lib/ai/groq";
 import { buildSystemPrompt, validateQuestion } from "@/lib/ai/prompt";
 import { callerKey, take } from "@/lib/ai/rate-limit";
-import { SITE } from "@/lib/site";
 
 /**
  * The only server-side route on the site.
@@ -26,13 +25,19 @@ function refuse(status: number, error: string, headers: HeadersInit = {}) {
  * Rejects cross-origin callers. Weak on its own — a header is trivially forged
  * outside a browser — but it stops the endpoint being embedded in someone
  * else's page and billed to this key, which is the realistic abuse.
+ *
+ * Compared against the host the request actually arrived on, not a configured
+ * domain: the same build is served from the custom domain, from *.vercel.app
+ * and from every preview deployment, and pinning one of those would reject the
+ * others. Same-origin is the property we want, and this tests exactly that.
  */
 function sameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
-  if (!origin) return true; // same-origin fetches may omit it entirely
-  if (process.env.NODE_ENV !== "production") return true;
+  if (!origin) return true; // same-origin fetches may omit the header entirely
+
+  const host = request.headers.get("host") ?? new URL(request.url).host;
   try {
-    return new URL(origin).host === new URL(SITE.url).host;
+    return new URL(origin).host === host;
   } catch {
     return false;
   }
