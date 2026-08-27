@@ -1,26 +1,164 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * MSRX Tools — "The Workbench"
+ *
+ * The whole site is a bench: a warm paper ground, tools laid out on it, and one
+ * recessed well where the work happens. Two rules keep it coherent:
+ *
+ *   1. The accent never carries small text. Brand cyan is 2.4:1 on white — it
+ *      fills marks, rules and chips, and `--color-accent-ink` carries the words.
+ *   2. Depth has direction. Cards sit ON the bench (raised). The workspace is cut
+ *      INTO it (recessed). Nothing is both.
+ *
+ * See docs/design-system.md before adding a new surface.
+ */
+
+@theme {
+  /* Ground and surfaces */
+  --color-bench: #f6f4ef;
+  --color-surface: #ffffff;
+  --color-surface-sunk: #efece5;
+  --color-line: #e0dcd2;
+  --color-line-strong: #cec8ba;
+
+  /* Ink */
+  --color-ink: #17191d;
+  --color-ink-soft: #565c68;
+  --color-ink-faint: #8a8f9a;
+
+  /* Accent — cyan family. `accent` fills, `accent-ink` writes. */
+  --color-accent: #06b6d4;
+  --color-accent-deep: #0b6b7a;
+  --color-accent-ink: #075a66;
+  --color-accent-wash: #e6f7fa;
+
+  /* Signals */
+  --color-danger: #b42318;
+  --color-danger-wash: #fef3f2;
+  --color-good: #027a48;
+  --color-good-wash: #ecfdf3;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+
+  /* One elevation ladder, used everywhere. Raised only. */
+  --shadow-raise: 0 1px 2px rgb(23 25 29 / 0.05), 0 1px 1px rgb(23 25 29 / 0.04);
+  --shadow-lift: 0 4px 12px -2px rgb(23 25 29 / 0.08), 0 2px 4px -2px rgb(23 25 29 / 0.05);
+  --shadow-float: 0 16px 32px -8px rgb(23 25 29 / 0.14), 0 4px 8px -4px rgb(23 25 29 / 0.06);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark mode overrides the generated custom properties directly. `@theme` is only
+   valid at the top level, so a nested `@theme` here would silently do nothing. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-bench: #14161a;
+    --color-surface: #1b1e23;
+    --color-surface-sunk: #101216;
+    --color-line: #2a2e35;
+    --color-line-strong: #3b414a;
+
+    --color-ink: #ecedf0;
+    --color-ink-soft: #a3a9b4;
+    --color-ink-faint: #767d89;
+
+    --color-accent: #22d3ee;
+    --color-accent-deep: #67e8f9;
+    --color-accent-ink: #67e8f9;
+    --color-accent-wash: #0d3238;
+
+    --color-danger: #fda29b;
+    --color-danger-wash: #2c1614;
+    --color-good: #6ce9a6;
+    --color-good-wash: #0d2a1e;
+
+    --shadow-raise: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-lift: 0 4px 12px -2px rgb(0 0 0 / 0.5);
+    --shadow-float: 0 16px 32px -8px rgb(0 0 0 / 0.6);
   }
 }
 
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bench);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* The bench has a grain: a barely-there weave so white cards read as objects
+     resting on something rather than holes cut in a flat colour. */
+  background-image:
+    repeating-linear-gradient(0deg, rgb(23 25 29 / 0.015) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(23 25 29 / 0.012) 0 1px, transparent 1px 3px);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-image:
+      repeating-linear-gradient(0deg, rgb(255 255 255 / 0.014) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.01) 0 1px, transparent 1px 3px);
+  }
+}
+
+/* Custom rules live in @layer components, or Tailwind utilities lose to them
+   and every `className` override silently stops working. */
+@layer components {
+  /* The signature device: the workspace is cut INTO the bench. */
+  .well {
+    background-color: var(--color-surface-sunk);
+    border: 1px solid var(--color-line);
+    box-shadow: inset 0 2px 4px rgb(23 25 29 / 0.06), inset 0 0 0 1px rgb(255 255 255 / 0.4);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .well {
+      box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.03);
+    }
+  }
+
+  /* A tool card rests ON the bench. */
+  .plate {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-raise);
+    transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+
+  .plate:hover {
+    box-shadow: var(--shadow-lift);
+    border-color: var(--color-line-strong);
+  }
+
+  /* The rule under a section heading — a machined edge, not a hairline. */
+  .bench-rule {
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-accent) 0 2.5rem, var(--color-line) 2.5rem 100%);
+  }
+
+  .focus-ring {
+    outline: 2px solid var(--color-accent-deep);
+    outline-offset: 2px;
+  }
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent-deep);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background-color: var(--color-accent-wash);
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
