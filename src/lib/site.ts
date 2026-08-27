@@ -5,7 +5,7 @@ export const SITE = {
   url: "https://tools.msrx.co.in",
   tagline: "Every file tool you need. None of them upload your files.",
   description:
-    "A hundred-plus free tools for PDFs, images, text, data and code — all of them running inside your browser. Nothing is uploaded, nothing is stored, and no account is needed.",
+    "Free forever, no account, works offline. Merge and split PDFs, compress and convert images, format JSON and more — all processed inside your own browser, so your files are never uploaded and nothing is stored on a server.",
   brand: "MSRX",
   brandUrl: "https://www.msrx.co.in",
   locale: "en_IN",

@@ -131,6 +131,31 @@ describe("registry integrity", () => {
   });
 });
 
+describe("category blurbs describe tools that exist", () => {
+  // These are marketing copy on the busiest pages, and they drift: both were
+  // written from the plan and outlived the tools they described.
+  const FORBIDDEN: Record<string, RegExp> = {
+    pdf: /\block\b|\bunlock\b|protect|password|encrypt|OCR/i,
+    image: /MozJPEG|OxiPNG|AVIF|upscal|AI/i,
+  };
+
+  it("does not name a capability the category does not have", () => {
+    for (const category of CATEGORIES) {
+      const forbidden = FORBIDDEN[category.id];
+      if (!forbidden) continue;
+      expect(category.blurb, `${category.id} blurb`).not.toMatch(forbidden);
+      expect(category.short, `${category.id} short`).not.toMatch(forbidden);
+    }
+  });
+
+  it("gives every populated category a blurb worth reading", () => {
+    for (const category of CATEGORIES) {
+      if (TOOLS.filter((t) => t.category === category.id).length === 0) continue;
+      expect(category.blurb.length, category.id).toBeGreaterThan(60);
+    }
+  });
+});
+
 describe("search", () => {
   it("finds an exact slug first", () => {
     expect(searchTools("json-formatter")[0].slug).toBe("json-formatter");

@@ -33,7 +33,17 @@ export const metadata: Metadata = {
     locale: SITE.locale,
     url: SITE.url,
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", title: SITE.name, description: SITE.description },
+  keywords: [
+    "free online tools",
+    "no upload pdf tools",
+    "browser based file tools",
+    "compress pdf free",
+    "merge pdf online free",
+    "compress image online",
+    "private file tools",
+    "offline web tools",
+  ],
   robots: { index: true, follow: true },
 };
 

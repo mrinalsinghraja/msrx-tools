@@ -5,10 +5,10 @@ export const CATEGORIES: Category[] = [
     id: "pdf",
     slug: "pdf",
     title: "PDF",
-    short: "Merge, split, compress, protect",
+    short: "Merge, split, compress, redact",
     icon: "FileText",
     blurb:
-      "Everything a document needs — combine, take apart, shrink, rotate, stamp, lock and unlock. Your PDFs are read and rewritten inside this tab and never uploaded anywhere.",
+      "Combine, take apart, shrink, rotate, stamp, sign and redact. Your PDFs are read and rewritten inside this tab and never uploaded anywhere.",
   },
   {
     id: "image",
@@ -17,7 +17,7 @@ export const CATEGORIES: Category[] = [
     short: "Convert, compress, resize, crop",
     icon: "Image",
     blurb:
-      "Modern encoders — MozJPEG, OxiPNG, WebP, AVIF — compiled to run in your browser. Same quality as the desktop tools, none of the uploading.",
+      "Resize, crop, compress and convert using the browser's own image engine — no plugin, no upload, and fast enough that a batch finishes before a competitor's page has loaded.",
   },
   {
     id: "media",
