@@ -1,6 +1,9 @@
 import type { OptionValues, ToolSpec } from "@/lib/tools/types";
 
-import type { FileOpResult, InputFile, ProgressReporter } from "./file-types";
+import type { FileOp, FileOpResult, InputFile, ProgressReporter } from "./file-types";
+
+/** What each engine module exports: a lookup from op name to implementation. */
+type FileOpLoader = FileOp | undefined;
 import { getPureOp } from "./pure";
 import { ToolError, type OpResult } from "./types";
 
@@ -43,18 +46,21 @@ export async function runFileTool(
   options: OptionValues,
   onProgress?: ProgressReporter,
 ): Promise<FileOpResult> {
-  if (tool.engine === "pdf") {
-    const { getPdfOp } = await import("./pdf");
-    const op = getPdfOp(tool.op);
-    if (!op) {
-      throw new ToolError(
-        `This tool is wired to an operation ("${tool.op}") that isn't available. Please report it.`,
-      );
-    }
-    return await op(files, options, onProgress);
-  }
+  const loaders: Partial<Record<ToolSpec["engine"], () => Promise<(name: string) => FileOpLoader>>> = {
+    pdf: async () => (await import("./pdf")).getPdfOp,
+    image: async () => (await import("./image")).getImageOp,
+  };
 
-  throw new ToolError(`The ${tool.engine} engine isn't available in this build yet.`);
+  const load = loaders[tool.engine];
+  if (!load) throw new ToolError(`The ${tool.engine} engine isn't available in this build yet.`);
+
+  const op = (await load())(tool.op);
+  if (!op) {
+    throw new ToolError(
+      `This tool is wired to an operation ("${tool.op}") that isn't available. Please report it.`,
+    );
+  }
+  return await op(files, options, onProgress);
 }
 
 /** Every option's declared default, which is the state a tool page opens in. */

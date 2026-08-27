@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { IMAGE_OPS } from "@/lib/engines/image";
 import { PDF_OPS } from "@/lib/engines/pdf";
 import { PURE_OPS } from "@/lib/engines/pure";
 import { CATEGORIES, CATEGORY_BY_ID } from "@/lib/tools/categories";
@@ -46,6 +47,11 @@ describe("registry integrity", () => {
 
   it("maps every pdf tool's op to a real implementation", () => {
     const missing = TOOLS.filter((t) => t.engine === "pdf" && !PDF_OPS[t.op]).map((t) => `${t.slug} → ${t.op}`);
+    expect(missing).toEqual([]);
+  });
+
+  it("maps every image tool's op to a real implementation", () => {
+    const missing = TOOLS.filter((t) => t.engine === "image" && !IMAGE_OPS[t.op]).map((t) => `${t.slug} → ${t.op}`);
     expect(missing).toEqual([]);
   });
 
