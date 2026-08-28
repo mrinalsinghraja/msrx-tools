@@ -1,5 +1,6 @@
 import type { ToolContent } from "@/lib/tools/types";
 
+import { CALC_CONTENT } from "./calc";
 import { DEV_CONTENT } from "./dev";
 import { FILE_CONTENT } from "./file";
 import { IMAGE_CONTENT } from "./image";
@@ -20,6 +21,7 @@ export const TOOL_CONTENT: Record<string, ToolContent> = {
   ...SECURITY_CONTENT,
   ...FILE_CONTENT,
   ...IMAGE_CONTENT,
+  ...CALC_CONTENT,
 };
 
 export function getToolContent(slug: string): ToolContent | undefined {
