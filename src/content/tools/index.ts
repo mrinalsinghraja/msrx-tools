@@ -1,6 +1,7 @@
 import type { ToolContent } from "@/lib/tools/types";
 
 import { DEV_CONTENT } from "./dev";
+import { SECURITY_CONTENT } from "./security";
 import { TEXT_CONTENT } from "./text";
 
 /**
@@ -14,6 +15,7 @@ import { TEXT_CONTENT } from "./text";
 export const TOOL_CONTENT: Record<string, ToolContent> = {
   ...TEXT_CONTENT,
   ...DEV_CONTENT,
+  ...SECURITY_CONTENT,
 };
 
 export function getToolContent(slug: string): ToolContent | undefined {

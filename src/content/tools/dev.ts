@@ -9,7 +9,9 @@ It is an encoding, not encryption. Anyone can decode it in a second, and this to
 
 Two options here matter in practice. The URL-safe alphabet replaces the plus and forward slash with hyphen and underscore, which is what you need when the encoded value goes into a URL path, a query string or a filename — the standard alphabet would otherwise need percent-encoding on top and produce something unreadable. The padding switch removes the trailing equals signs, which several specifications including JWT require you to omit.
 
-Encoding runs through a proper UTF-8 encoder rather than the browser's raw btoa, which throws an exception on the first character above U+00FF. That means accented letters, emoji, Japanese and every other script encode correctly here, where a naive implementation would fail outright.`,
+Encoding runs through a proper UTF-8 encoder rather than the browser's raw btoa, which throws an exception on the first character above U+00FF. That means accented letters, emoji, Japanese and every other script encode correctly here, where a naive implementation would fail outright.
+
+One thing Base64 is not is a way to hide anything. It is a transport encoding, reversible by anyone with a decoder and no key at all, so an API key that has merely been Base64-encoded is an API key written in public. If what you want is secrecy rather than safe transport, encrypt it and encode the ciphertext.`,
     steps: [
       "Paste or type the text you want to encode into the input box.",
       "Turn on the URL-safe alphabet if the result will go into a URL, a query string or a filename.",
@@ -153,7 +155,9 @@ The tester runs your pattern against your sample text using the browser's own re
 
 Flags are yours to set. Global finds every match rather than the first, case-insensitive is self-explanatory, multiline changes what the start and end anchors mean, and dot-all lets the dot match a newline. The tool forces the global flag internally when listing matches, so you get the full list even if you left it off.
 
-An invalid pattern is reported with the engine's own explanation rather than silently producing nothing, which is the difference between debugging a pattern and staring at it.`,
+An invalid pattern is reported with the engine's own explanation rather than silently producing nothing, which is the difference between debugging a pattern and staring at it.
+
+Worth remembering: this runs on JavaScript's own regular-expression engine, so it tells you what your JavaScript will do. Most of what you write here will behave identically in Python, Ruby or Go, but lookbehind support, named-group syntax and the treatment of Unicode properties differ enough between engines that a pattern proven here is proven for the browser first.`,
     steps: [
       "Paste the text you want to search into the input box.",
       "Type your pattern into the Pattern field in the options — do not include the surrounding slashes.",

@@ -84,11 +84,13 @@ The size figures above the result show the before, the after and the percentage 
   "json-validator": {
     intro: `A validator answers one question — will a parser accept this? — and, when the answer is no, says exactly where it stopped. That is most of the value. Malformed JSON almost always fails at a single identifiable character, and the difference between a five-second fix and a twenty-minute hunt is knowing which character.
 
-This validator reports the line and column of the first fault. It finds that position itself by scanning the document, rather than relying on the browser's error message, because those messages vary wildly between browsers and versions — some give a byte offset, some give a truncated excerpt and no position at all.
+This validator points at the exact character that broke it, giving the line and offset of the first fault. It finds that position itself by scanning the document, rather than relying on the browser's error message, because those messages vary wildly between browsers and versions — some give a byte offset, some give a truncated excerpt and no position at all.
 
 When the document is valid, the tool describes its shape instead: the root type, how many objects and arrays it contains, the total number of keys, how many scalar values there are and how deeply the structure nests. That summary is a quick sanity check against what you expected. An API that should return a list of twenty items and reports one object at depth two has told you something useful before you have read a single field.
 
-Everything happens in your browser. You can validate a payload containing real customer data or a live token without it leaving the machine.`,
+Everything happens in your browser. You can validate a payload containing real customer data or a live token without it leaving the machine.
+
+Validation here means the strict specification, not the dialects that look like it. Comments, trailing commas, single-quoted strings and unquoted keys all belong to JSON5 or JSONC, and all of them are rejected — deliberately, because a document this tool calls valid should be a document every real parser accepts.`,
     steps: [
       "Paste the JSON you want to check into the input box.",
       "Read the verdict below: either a confirmation with a structure summary, or an error naming the line and column.",
@@ -293,7 +295,9 @@ The conversion is smarter than swapping characters, because turning “getHTTPRe
 
 Title case follows the convention most style guides share: articles, short prepositions and conjunctions stay lowercase unless they begin or end the title. "The Lord of the Rings", not "The Lord Of The Rings". Sentence case lowercases the whole string and then capitalises after each full stop, question mark or exclamation mark, which is the right behaviour for a heading that arrived in all capitals.
 
-Everything runs in the browser as you type.`,
+Everything runs in the browser as you type, which matters more than it sounds: renaming a column across a schema, or a variable across a file, often means pasting something you would rather not hand to a stranger's server. There is no server here to hand it to.
+
+The conversions are lossless in one direction and not the other, which is worth knowing before you rely on a round trip. Going from “userAccountId” to “user_account_id” and back returns exactly what you started with. Going from “HTTPResponse” to “http_response” and back gives you “HttpResponse”, because once the capitals have gone there is nothing left to say the first three letters were an acronym. If you are converting identifiers in bulk, check the acronyms afterwards.`,
     steps: [
       "Paste or type your text into the input box.",
       "Pick the case you want from the dropdown — the result updates immediately.",
