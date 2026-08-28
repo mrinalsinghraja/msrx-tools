@@ -2,7 +2,6 @@ import * as icons from "lucide-react";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
 
-import { HeroAssembly } from "@/components/diagram/hero-assembly";
 import { ToolCard } from "@/components/tools/tool-card";
 import { CLAIMS, COMPARISONS, HOME_FAQ, PITCH } from "@/lib/pitch";
 import { SITE } from "@/lib/site";
@@ -14,25 +13,53 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="sheet-grid border-b-2 border-graphite">
+      <section className="border-b-2 border-graphite">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
           <p className="annot">
             {TOOL_COUNT} tools · free · no account · nothing uploaded
           </p>
-          <h1 className="stamp mt-4 max-w-3xl text-4xl font-semibold leading-[1.06] text-graphite sm:text-5xl">
+          <h1 className="stamp mt-5 max-w-4xl text-[2.1rem] font-semibold leading-[1.05] text-graphite sm:text-[3.4rem]">
             Every file tool you need.
             <br />
             <span className="text-graphite-soft">None of them upload your files.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-graphite-soft">
+          <p className="mt-7 max-w-xl text-[17px] leading-relaxed text-graphite-soft">
             Other tool sites send your documents to a server, process them there and promise to
             delete them later. These run inside the tab you already have open. There is no upload
             to trust, because there is no upload.
           </p>
 
-          {/* The argument, drawn. See hero-assembly.tsx for why it is a diagram. */}
-          <div className="mt-10 border border-construction bg-sheet p-4 sm:p-6">
-            <HeroAssembly />
+          {/*
+            The claim is a statement about distance travelled, so it is stated as
+            a dimension — the one drawn element in the hero, set inline at the
+            measure of the text rather than boxed up as a picture.
+          */}
+          <figure className="mt-12 max-w-4xl">
+            <div className="dimension">
+              <span className="annot font-medium text-pen-new">
+                Entire journey — 0 bytes transmitted
+              </span>
+            </div>
+            <figcaption className="mt-2.5 flex justify-between gap-4">
+              <span className="annot">File opened here</span>
+              <span className="annot">Result saved here</span>
+            </figcaption>
+          </figure>
+
+          {/*
+            The revision note. A drawing records what changed; the single most
+            important fact about this site is a path that is not there, and a
+            struck line says that better than a paragraph does.
+          */}
+          <div className="revision mt-10 max-w-xl">
+            <p className="annot font-medium text-pen-rev">Rev. 00 — upload path deleted</p>
+            <p className="struck mt-2.5 font-mono text-[15px]">
+              your file → someone else&rsquo;s server → your file back
+            </p>
+            <p className="mt-2.5 text-[14px] leading-relaxed text-graphite-soft">
+              The step every other tool site depends on is the step this one removes. Nothing to
+              trust, because nothing is sent.
+            </p>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -51,15 +78,12 @@ export default function HomePage() {
           </div>
 
           <dl className="mt-14 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-            {CLAIMS.map((claim, index) => {
+            {CLAIMS.map((claim) => {
               const set = icons as unknown as Record<string, icons.LucideIcon>;
               const Icon = set[claim.icon] ?? icons.Check;
               return (
                 <div key={claim.title} className="border-t border-construction pt-4">
-                  {/* Callout bubbles are numbered because these annotate the
-                      drawing above — the number is the leader, not decoration. */}
                   <dt className="flex items-start gap-3">
-                    <span className="callout mt-0.5">{String(index + 1).padStart(2, "0")}</span>
                     <span className="stamp text-sm font-semibold text-graphite">
                       <Icon className="mr-1.5 inline size-4 -translate-y-px text-pen-new" aria-hidden />
                       {claim.title}
@@ -89,7 +113,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-b border-construction bg-sheet">
+      <section className="border-b border-construction bg-sheet/85">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <h2 className="stamp-wide text-xl font-semibold text-graphite">
             How this differs from every other tool site
@@ -164,7 +188,7 @@ export default function HomePage() {
         })}
       </div>
 
-      <section className="border-t border-construction bg-sheet">
+      <section className="border-t border-construction bg-sheet/85">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
           <h2 className="stamp-wide text-xl font-semibold text-graphite">
             Questions people reasonably ask

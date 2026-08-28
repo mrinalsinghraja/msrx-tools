@@ -21,7 +21,7 @@ export function LegalPage({ document }: { document: LegalDocument }) {
       </nav>
 
       <header className="max-w-2xl">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-graphite sm:text-4xl">
+        <h1 className="stamp text-4xl font-semibold text-graphite sm:text-5xl">
           {document.title}
         </h1>
         <div className="section-rule mt-4 rounded-full" />
@@ -34,7 +34,7 @@ export function LegalPage({ document }: { document: LegalDocument }) {
       <div className="mt-10 flex flex-col gap-10">
         {document.sections.map((section) => (
           <section key={section.heading}>
-            <h2 className="font-display text-xl font-semibold tracking-tight text-graphite">
+            <h2 className="stamp-wide text-lg font-semibold text-graphite">
               {section.heading}
             </h2>
 

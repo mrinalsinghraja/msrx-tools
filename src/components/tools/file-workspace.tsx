@@ -139,7 +139,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
           )}
         >
           <Upload className="size-7 text-graphite-faint" aria-hidden />
-          <p className="mt-3 font-display text-base font-semibold text-graphite">
+          <p className="stamp mt-3 text-base font-semibold text-graphite">
             {multiple ? "Drop your files here" : "Drop your file here"}
           </p>
           <p className="mt-1 text-[13px] text-graphite-soft">
@@ -248,7 +248,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
 
       <aside className="lg:sticky lg:top-6 lg:self-start">
         <div className="plate rounded-lg p-5">
-          <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-[0.1em] text-graphite-soft">
+          <h2 className="stamp-wide mb-4 text-sm font-semibold text-graphite-soft">
             Options
           </h2>
           {tool.options.length ? (

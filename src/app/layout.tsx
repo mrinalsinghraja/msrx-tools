@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 
+import { PlanGround } from "@/components/shell/plan-ground";
 import { SiteFooter } from "@/components/shell/site-footer";
 import { SiteHeader } from "@/components/shell/site-header";
 import { SITE } from "@/lib/site";
@@ -67,6 +68,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${archivo.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* The plan is mounted here so every route sits on it by construction and
+            a new page cannot be added without it. */}
+        <PlanGround />
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

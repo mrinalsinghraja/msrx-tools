@@ -24,7 +24,7 @@ export function SiteFooter() {
   const revision = new Date().toISOString().slice(0, 10);
 
   return (
-    <footer className="mt-20 border-t-2 border-graphite bg-sheet">
+    <footer className="mt-20 border-t-2 border-graphite bg-sheet/90">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid grid-cols-2 border-b border-construction md:grid-cols-4">
           <Field label="Project">

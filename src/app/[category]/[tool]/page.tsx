@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ToolDiagram } from "@/components/diagram/tool-diagram";
 import { AssistantPanel } from "@/components/tools/assistant-panel";
+import { SpecBlock } from "@/components/tools/spec-block";
 import { ToolCard } from "@/components/tools/tool-card";
 import { ToolRunner } from "@/components/tools/tool-runner";
 import { getToolContent } from "@/content/tools";
@@ -88,9 +88,9 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
           <p className="annot mt-3 text-pen-new">{PRIVACY_LINE}</p>
         </div>
 
-        {/* The operation, drawn. Which drawing appears is derived from the
-            registry, so it can never contradict what the tool does. */}
-        <ToolDiagram tool={tool} />
+        {/* The facts you want before starting, read straight from the registry
+            so a row can never disagree with the tool it describes. */}
+        <SpecBlock tool={tool} />
       </header>
 
       <ToolRunner slug={tool.slug} />

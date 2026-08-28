@@ -1,38 +1,54 @@
 @import "tailwindcss";
 
 /*
- * MSRX Tools — "Sheet 1 of 1"
+ * MSRX Tools — "Plotted on the plan"
  *
- * The site is a structural drawing. Not a blueprint: real contemporary
- * engineering drawings are plotted on near-white film in thin precise linework,
- * annotated in two pens, and signed off in a title block. That is the world
- * these tools belong to — instruments, specified on a sheet.
+ * The site is not a page with an engineering picture on it. The sheet IS the
+ * ground: a structural framing plan is plotted behind every route, and the
+ * content sits on it the way tracing paper sits over a drawing.
  *
- * Three rules hold the whole thing together:
+ * That distinction is the whole design. An illustration dropped into a box in
+ * the corner of a page is a stock-photo slot no matter how principled the
+ * drawing inside it is. A ground the content is laid onto cannot be mistaken
+ * for stock, because it is the substrate rather than an object.
  *
- *   1. Drafting devices must encode something true. Grid references map to
- *      categories, dimension lines carry real measurements, callout bubbles are
- *      links to a detail. A device that only decorates gets cut.
+ * Three rules hold it together:
+ *
+ *   1. Drafting devices must encode something true. The margin bubbles are the
+ *      category axis and the current one is inked. Dimension chains carry real
+ *      measurements. The specification block on a tool page reads from the
+ *      registry. A device that only decorates gets cut.
  *   2. Two pens. `--pen-new` draws the work; `--pen-rev` is the revision pen and
  *      appears at most once per page. Bright cyan fills marks and never sets text.
- *   3. The theme lives in the chrome. Inside a tool the sheet goes quiet, because
- *      somebody is trying to merge a PDF, not admire a drawing.
+ *   3. The ground stays under. It is felt at a glance and only resolves into a
+ *      real plan when looked at. It must never compete with a person trying to
+ *      merge a PDF.
  *
  * See docs/design-system.md before adding a new surface.
  */
 
 @theme {
-  /* Ground and surfaces */
-  --color-film: #edeeea;
+  /* Ground and surfaces. Film is the drafting stock; sheet is drawn-on white. */
+  --color-film: #eeefeb;
   --color-sheet: #ffffff;
-  --color-sunk: #e3e5e0;
-  --color-construction: #c7cbc6;
-  --color-construction-strong: #a9aeaa;
+  --color-sunk: #e4e6e1;
+  --color-construction: #c9cdc7;
+  --color-construction-strong: #a8ada8;
+
+  /*
+   * The plan ground. Separate from `construction` on purpose: construction
+   * linework is drawn ON the sheet at readable weight, the plan is drawn UNDER
+   * it and has to survive being nearly invisible. Tying them together means
+   * every attempt to strengthen a border also shouts the background.
+   */
+  --color-plan-minor: #d7dad4;
+  --color-plan-major: #c2c7c0;
+  --color-plan-node: #aeb4ad;
 
   /* Graphite — the linework and the lettering */
-  --color-graphite: #15181a;
-  --color-graphite-soft: #596068;
-  --color-graphite-faint: #878d92;
+  --color-graphite: #14171a;
+  --color-graphite-soft: #575e66;
+  --color-graphite-faint: #858b90;
 
   /* The two pens. `pen-new` writes; `pen-fill` only ever fills. */
   --color-pen-new: #0e7c8a;
@@ -55,21 +71,25 @@
   --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
 
   /* Drawings do not have drop shadows. Elevation is a heavier line weight. */
-  --shadow-raise: 0 1px 0 rgb(21 24 26 / 0.04);
-  --shadow-lift: 0 2px 0 rgb(21 24 26 / 0.06);
-  --shadow-float: 0 8px 24px -12px rgb(21 24 26 / 0.25);
+  --shadow-raise: 0 1px 0 rgb(20 23 26 / 0.04);
+  --shadow-lift: 0 2px 0 rgb(20 23 26 / 0.06);
+  --shadow-float: 0 8px 24px -12px rgb(20 23 26 / 0.25);
 }
 
 /* Dark mode overrides the generated custom properties directly. `@theme` is only
    valid at the top level, so a nested `@theme` here would silently do nothing.
-   The dark sheet is a negative plot — graphite ground, white linework. */
+   The dark sheet is a negative plot — graphite ground, luminous linework. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-film: #121416;
-    --color-sheet: #1a1d20;
-    --color-sunk: #0d0f11;
-    --color-construction: #2f3438;
+    --color-film: #101315;
+    --color-sheet: #191d20;
+    --color-sunk: #0c0e10;
+    --color-construction: #2e3337;
     --color-construction-strong: #454b50;
+
+    --color-plan-minor: #1d2225;
+    --color-plan-major: #272d31;
+    --color-plan-node: #394045;
 
     --color-graphite: #eceef0;
     --color-graphite-soft: #a4abb2;
@@ -106,32 +126,26 @@ body {
    and every `className` override silently stops working. */
 @layer components {
   /*
-   * The construction grid. A structural column grid at 64px, with a heavier
-   * line every fourth — the same hierarchy a real plan uses to separate bays
-   * from sub-divisions. Sits behind everything and is never the subject.
+   * A drawn element sits on the sheet: hairline, no shadow. Translucent so the
+   * plan reads through it — a plate is tracing paper laid on the drawing, not a
+   * lid closed over it. This is the one thing that makes the ground feel like a
+   * substrate rather than a texture behind an opaque page.
    */
-  .sheet-grid {
-    background-image:
-      linear-gradient(to right, var(--color-construction) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--color-construction) 1px, transparent 1px),
-      linear-gradient(to right, color-mix(in srgb, var(--color-construction) 55%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, var(--color-construction) 55%, transparent) 1px, transparent 1px);
-    background-size:
-      256px 256px,
-      256px 256px,
-      64px 64px,
-      64px 64px;
-  }
-
-  /* A drawn element sits on the sheet: white, hairline, no shadow. */
   .plate {
-    background-color: var(--color-sheet);
+    background-color: color-mix(in srgb, var(--color-sheet) 88%, transparent);
     border: 1px solid var(--color-construction);
     transition: border-color 140ms ease, background-color 140ms ease;
   }
 
   .plate:hover {
     border-color: var(--color-pen-new);
+    background-color: var(--color-sheet);
+  }
+
+  /* A pane: a larger reading surface, more opaque because prose needs it. */
+  .pane {
+    background-color: color-mix(in srgb, var(--color-sheet) 92%, transparent);
+    border: 1px solid var(--color-construction);
   }
 
   /*
@@ -159,24 +173,35 @@ body {
   }
 
   /*
-   * A dimension line: extension ticks at each end, rule between, label centred.
-   * Used only where there is a real quantity to state.
+   * A dimension chain: terminator ticks at both ends, rule between, label sat
+   * in the gap the way a plotted dimension breaks its own line. Used only where
+   * there is a real quantity to state — this is not a divider.
    */
   .dimension {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    color: var(--color-graphite-soft);
+    gap: 0.875rem;
   }
 
   .dimension::before,
   .dimension::after {
     content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--color-construction-strong);
-    /* The extension tick at each terminator. */
-    box-shadow: 0 0 0 0 transparent;
+    flex: 1 1 0;
+    height: 7px;
+    /* The rule sits on the vertical centre; the ticks are the box edges. */
+    border-block: 0 solid transparent;
+    background:
+      linear-gradient(var(--color-construction-strong), var(--color-construction-strong))
+        left center / 100% 1px no-repeat;
+    position: relative;
+  }
+
+  .dimension::before {
+    box-shadow: inset 1px 0 0 0 var(--color-construction-strong);
+  }
+
+  .dimension::after {
+    box-shadow: inset -1px 0 0 0 var(--color-construction-strong);
   }
 
   .dimension > * {
@@ -193,28 +218,11 @@ body {
     );
   }
 
-  /* A detail callout bubble — the circle-and-number that says "see detail N". */
-  .callout {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.75rem;
-    height: 1.75rem;
-    padding-inline: 0.375rem;
-    border: 1.5px solid var(--color-pen-new);
-    border-radius: 999px;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.06em;
-    color: var(--color-pen-new);
-    background: var(--color-sheet);
-  }
-
   /* Display lettering is set expanded, the way a title block is stamped. */
   .stamp {
     font-family: var(--font-display);
     font-variation-settings: "wdth" 112;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
 
   .stamp-wide {
@@ -222,6 +230,23 @@ body {
     font-variation-settings: "wdth" 125;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+  }
+
+  /*
+   * The revision note. A drawing records what changed and why, and the single
+   * most important fact about this site is a path that was deleted. One per
+   * page, never more — see rule 2.
+   */
+  .revision {
+    border-left: 2px solid var(--color-pen-rev);
+    padding-left: 0.875rem;
+  }
+
+  .struck {
+    text-decoration: line-through;
+    text-decoration-color: var(--color-pen-rev);
+    text-decoration-thickness: 1.5px;
+    color: var(--color-graphite-faint);
   }
 }
 
@@ -237,24 +262,16 @@ body {
   color: var(--color-graphite);
 }
 
-/* The plot animation: linework draws itself in, as a plotter would lay it down. */
-@keyframes plot-in {
-  from {
-    stroke-dashoffset: var(--plot-length, 1000);
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes annot-in {
+/*
+ * The plan plots itself in once on load, the way a plotter lays a sheet down:
+ * grid first, then the bracing. It happens behind the content and never repeats.
+ */
+@keyframes plan-in {
   from {
     opacity: 0;
-    transform: translateY(2px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
@@ -267,9 +284,9 @@ body {
     transition-duration: 0.01ms !important;
   }
 
-  /* A drawing that never finished plotting is worse than one that was always
-     there, so reduced motion gets the completed sheet immediately. */
-  [data-plot] {
-    stroke-dashoffset: 0 !important;
+  /* A sheet that never finished plotting is worse than one that was always
+     there, so reduced motion gets the completed ground immediately. */
+  [data-plan] {
+    opacity: 1 !important;
   }
 }

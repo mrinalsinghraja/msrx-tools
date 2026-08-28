@@ -48,12 +48,12 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
       </nav>
 
       <header className="max-w-2xl">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-graphite sm:text-4xl">
+        <h1 className="stamp text-4xl font-semibold text-graphite sm:text-5xl">
           {category.title} tools
         </h1>
         <div className="section-rule mt-4 rounded-full" />
         <p className="mt-5 text-base leading-relaxed text-graphite-soft">{category.blurb}</p>
-        <p className="mt-3 font-mono text-xs uppercase tracking-[0.14em] text-pen-new">
+        <p className="annot mt-3 font-medium text-pen-new">
           {tools.length} tools · free · nothing uploaded
         </p>
       </header>
@@ -65,7 +65,7 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
       </div>
 
       <section className="mt-16 border-t border-construction pt-10">
-        <h2 className="font-display text-lg font-semibold tracking-tight text-graphite">
+        <h2 className="stamp-wide text-lg font-semibold text-graphite">
           Other categories
         </h2>
         <ul className="mt-4 flex flex-wrap gap-2">

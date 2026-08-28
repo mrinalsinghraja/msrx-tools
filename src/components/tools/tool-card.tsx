@@ -14,12 +14,12 @@ export function ToolCard({ tool }: { tool: ToolSpec }) {
   const Icon = iconFor(tool.icon);
 
   return (
-    <Link href={toolHref(tool)} className="plate group flex gap-3 rounded-lg p-4">
-      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-pen-wash text-pen-new transition-colors group-hover:bg-pen-new group-hover:text-on-pen">
+    <Link href={toolHref(tool)} className="plate group flex gap-3 p-4">
+      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center bg-pen-wash text-pen-new transition-colors group-hover:bg-pen-new group-hover:text-on-pen">
         <Icon className="size-4" aria-hidden />
       </span>
       <span className="min-w-0">
-        <span className="block font-display text-sm font-semibold text-graphite">{tool.title}</span>
+        <span className="stamp block text-sm font-semibold text-graphite">{tool.title}</span>
         <span className="mt-1 block text-[13px] leading-snug text-graphite-soft">{tool.short}</span>
       </span>
     </Link>
