@@ -4,6 +4,12 @@ import { getPureOp } from "@/lib/engines/pure";
 import { defaultOptions, isOptionVisible } from "@/lib/engines/run";
 import { restateMeasure } from "@/lib/units";
 import { TOOLS } from "@/lib/tools/registry";
+import {
+  FIXTURE_CIPHERTEXT,
+  FIXTURE_PASSWORD,
+  FIXTURE_PRIVATE_KEY,
+  FIXTURE_SHARES,
+} from "./fixtures/crypto";
 import type { OptionSpec, OptionValues, ToolSpec } from "@/lib/tools/types";
 
 /**
@@ -64,6 +70,26 @@ const INPUT: Record<string, string> = {
   "number-to-words": "1234",
   "regex-tester": "The quick brown fox jumps over the lazy dog",
   "text-diff": "one\ntwo\nthree",
+  "json-schema-generator": '{"id":1,"email":"a@b.co","tags":["x"],"at":"2026-08-28"}',
+  "sql-to-typescript":
+    "CREATE TABLE users (id BIGINT PRIMARY KEY, email VARCHAR(255) NOT NULL, created_at TIMESTAMP, active BOOLEAN DEFAULT TRUE);",
+  "graphql-formatter": "query Q($id:ID!){ user(id:$id){ id name posts(first:10){ title } } }",
+  "cidr-calculator": "192.168.1.0/24",
+  "dns-record-parser":
+    "example.com.\t300\tIN\tA\t93.184.216.34\nexample.com.\t3600\tIN\tMX\t10 mail.example.com.\nexample.com.\t3600\tIN\tTXT\t\"v=spf1 include:_spf.google.com ~all\"",
+  "user-agent-parser":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  "unicode-inspector": "caf\u00e9 \u200b na\u00efve \u2014 \u0430bc",
+  "svg-optimizer":
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><!-- drawn --><title>x</title><path id="unused" d="M1.23456 2.34567 L10.98765 4.5"/></svg>',
+  "log-anonymizer":
+    "2026-08-28 ERROR user ada@example.com from 203.0.113.42 token eyJhbGciOiJIUzI1NiJ9.eyJhIjoxfQ.sig failed\n2026-08-28 INFO  ok from 203.0.113.42",
+  "split-secret": "correct horse battery staple",
+  "combine-secret-shares": FIXTURE_SHARES,
+  "totp-generator": "JBSWY3DPEHPK3PXP",
+  "encrypt-text": "a fixture the contract test can seal",
+  "decrypt-text": FIXTURE_CIPHERTEXT,
+  "sign-verify-text": "a message worth signing",
 };
 
 const DEFAULT_INPUT = "The quick brown fox\njumps over the lazy dog\nThe quick brown fox";
@@ -88,6 +114,11 @@ const REQUIRED: Record<string, OptionValues> = {
     smsNumber: "+911234567890",
     emailTo: "a@b.co",
   },
+  // Cryptography tools cannot work without the secret they exist to use, so
+  // each gets the smallest thing that makes it run.
+  "encrypt-text": { password: FIXTURE_PASSWORD },
+  "decrypt-text": { password: FIXTURE_PASSWORD },
+  "sign-verify-text": { key: FIXTURE_PRIVATE_KEY },
 };
 
 /** Combinations worth trying: every choice of every select, others at default. */

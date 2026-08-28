@@ -22,7 +22,15 @@ export type CategoryId =
   | "calc";
 
 /** Which worker bundle runs the op. `pure` needs no WASM and no worker warm-up. */
-export type EngineId = "pure" | "image" | "pdf" | "media" | "doc" | "archive" | "data";
+export type EngineId =
+  | "pure"
+  | "image"
+  | "pdf"
+  | "media"
+  | "doc"
+  | "archive"
+  | "data"
+  | "crypto";
 
 /**
  * The shape of the tool's workspace.
@@ -98,7 +106,19 @@ export type OptionSpec =
       compound?: { whenUnit: string; unit: string; label: string; default: number };
     })
   | (OptionBase & { kind: "toggle"; default: boolean })
-  | (OptionBase & { kind: "text"; default: string; placeholder?: string; maxLength?: number })
+  | (OptionBase & {
+      kind: "text";
+      default: string;
+      placeholder?: string;
+      maxLength?: number;
+      /**
+       * A password or key. Renders masked, with autofill and password managers
+       * told to leave it alone: this is not a login, and a manager that offers
+       * to save it would be storing the key to the person's own file under the
+       * name of a website that never receives it.
+       */
+      secret?: boolean;
+    })
   | (OptionBase & { kind: "textarea"; default: string; placeholder?: string; rows?: number })
   | (OptionBase & { kind: "color"; default: string })
   /** Free-form page selection, e.g. `1-3, 7, 12-`. Validated against the real page count. */

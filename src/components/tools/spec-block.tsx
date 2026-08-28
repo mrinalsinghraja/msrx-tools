@@ -22,6 +22,7 @@ const ENGINE_NOTE: Record<ToolSpec["engine"], string> = {
   doc: "This tab · document engine",
   archive: "This tab · archive engine",
   data: "This tab · data engine",
+  crypto: "This tab · WebCrypto",
 };
 
 function extList(exts: string[]) {

@@ -1,6 +1,7 @@
 import { CATEGORIES, CATEGORY_BY_ID } from "./categories";
 import { CALC_TOOLS } from "./catalog/calc";
 import { DEV_TOOLS } from "./catalog/dev";
+import { FILE_TOOLS } from "./catalog/file";
 import { IMAGE_TOOLS } from "./catalog/image";
 import { PDF_TOOLS } from "./catalog/pdf";
 import { SECURITY_TOOLS } from "./catalog/security";
@@ -17,6 +18,7 @@ import type { CategoryId, ToolSpec } from "./types";
 export const TOOLS: ToolSpec[] = [
   ...PDF_TOOLS,
   ...IMAGE_TOOLS,
+  ...FILE_TOOLS,
   ...TEXT_TOOLS,
   ...DEV_TOOLS,
   ...SECURITY_TOOLS,

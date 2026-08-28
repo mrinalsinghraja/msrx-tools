@@ -49,6 +49,8 @@ export async function runFileTool(
   const loaders: Partial<Record<ToolSpec["engine"], () => Promise<(name: string) => FileOpLoader>>> = {
     pdf: async () => (await import("./pdf")).getPdfOp,
     image: async () => (await import("./image")).getImageOp,
+    archive: async () => (await import("./archive")).getArchiveOp,
+    crypto: async () => (await import("./crypto")).getCryptoOp,
   };
 
   const load = loaders[tool.engine];

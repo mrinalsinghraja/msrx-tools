@@ -216,6 +216,10 @@ function OptionControl({
         <Field label={option.label} help={option.help} htmlFor={controlId}>
           <Input
             id={controlId}
+            type={"secret" in option && option.secret ? "password" : "text"}
+            autoComplete={"secret" in option && option.secret ? "new-password" : undefined}
+            autoCorrect={"secret" in option && option.secret ? "off" : undefined}
+            spellCheck={"secret" in option && option.secret ? false : undefined}
             placeholder={option.placeholder}
             maxLength={"maxLength" in option ? option.maxLength : undefined}
             value={String(value ?? "")}

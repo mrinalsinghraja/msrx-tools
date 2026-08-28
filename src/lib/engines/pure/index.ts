@@ -42,7 +42,12 @@ import {
   tip,
   unitConvert,
 } from "./numbers";
+import { decryptText, encryptText, rsaKeypair, rsaSign, shamirCombine, shamirSplit, totpGenerate } from "./crypto";
+import { gitignoreBuild, mockData } from "./generate";
+import { logAnonymize, svgOptimize, unicodeInspect } from "./inspect";
+import { cidrCalculate, dnsParse, userAgentParse } from "./network";
 import { qrGenerate } from "./qr";
+import { graphqlFormat, jsonSchemaGenerate, sqlToTypeScript } from "./schema";
 import { passwordGenerate, randomString, uuidGenerate } from "./random";
 import {
   caseConvert,
@@ -132,6 +137,34 @@ export const PURE_OPS: Record<string, PureOp> = {
   baseConvert,
   romanNumeral,
   numberToWords,
+
+  // Schema and pipelines
+  jsonSchemaGenerate,
+  sqlToTypeScript,
+  graphqlFormat,
+
+  // Network and clients
+  cidrCalculate,
+  dnsParse,
+  userAgentParse,
+
+  // Inspection and sanitising
+  unicodeInspect,
+  svgOptimize,
+  logAnonymize,
+
+  // Generators
+  gitignoreBuild,
+  mockData,
+
+  // Cryptography
+  encryptText,
+  decryptText,
+  totpGenerate,
+  shamirSplit,
+  shamirCombine,
+  rsaKeypair,
+  rsaSign,
 
   // CSS
   colorConvert,

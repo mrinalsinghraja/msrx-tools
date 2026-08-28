@@ -1,5 +1,8 @@
 import type { FileOp } from "../file-types";
 
+import { colorPalette, exifView, imageToAscii } from "./analyse";
+import { stegoHide, stegoReveal } from "./stego";
+
 import {
   blurRegion,
   compressImage,
@@ -35,6 +38,11 @@ export const IMAGE_OPS: Record<string, FileOp> = {
   removeSolidBackground,
   faviconSet,
   stripMetadata,
+  exifView,
+  colorPalette,
+  imageToAscii,
+  stegoHide,
+  stegoReveal,
 };
 
 export function getImageOp(name: string): FileOp | undefined {
@@ -43,6 +51,11 @@ export function getImageOp(name: string): FileOp | undefined {
 
 export {
   blurRegion,
+  colorPalette,
+  exifView,
+  imageToAscii,
+  stegoHide,
+  stegoReveal,
   compressImage,
   convertImage,
   cropImage,
