@@ -4,6 +4,7 @@ import { CALC_CONTENT } from "./calc";
 import { DEV_CONTENT } from "./dev";
 import { FILE_CONTENT } from "./file";
 import { IMAGE_CONTENT } from "./image";
+import { PDF_CONTENT } from "./pdf";
 import { SECURITY_CONTENT } from "./security";
 import { TEXT_CONTENT } from "./text";
 
@@ -22,6 +23,7 @@ export const TOOL_CONTENT: Record<string, ToolContent> = {
   ...FILE_CONTENT,
   ...IMAGE_CONTENT,
   ...CALC_CONTENT,
+  ...PDF_CONTENT,
 };
 
 export function getToolContent(slug: string): ToolContent | undefined {

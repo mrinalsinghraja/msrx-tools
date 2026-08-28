@@ -1,9 +1,26 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MAX_QUESTION_LENGTH } from "@/lib/ai/limits";
 import { buildSystemPrompt, presetQuestions, validateQuestion } from "@/lib/ai/prompt";
 import { callerKey, REQUESTS_PER_WINDOW, resetRateLimits, take, WINDOW_MS } from "@/lib/ai/rate-limit";
 import { getTool, TOOLS } from "@/lib/tools/registry";
+
+/**
+ * Every tool now has prose, so the branch that copes without it can no longer
+ * be reached by naming a slug. Hiding the content module on demand keeps that
+ * path covered — the earlier version pinned it to whichever page happened to be
+ * unwritten, which meant it stopped testing anything the moment that page was
+ * written, and then failed for a reason unrelated to the code it guards.
+ */
+const state = vi.hoisted(() => ({ hideContent: false }));
+
+vi.mock("@/content/tools", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/content/tools")>();
+  return {
+    ...actual,
+    getToolContent: (slug: string) => (state.hideContent ? undefined : actual.getToolContent(slug)),
+  };
+});
 
 describe("request validation", () => {
   it("accepts a real slug and a question", () => {
@@ -85,10 +102,23 @@ describe("system prompt", () => {
     expect(prompt).toContain("ANSWERS ALREADY PUBLISHED");
   });
 
-  it("still works for a tool with no prose written yet", () => {
-    const prompt = buildSystemPrompt("gst-calculator")!;
-    expect(prompt).toContain("GST Calculator");
-    expect(prompt).not.toContain("BACKGROUND");
+  it("omits the background section when a tool has no prose", () => {
+    // Every tool now has prose, so this branch has to be exercised deliberately
+    // rather than by naming whichever slug happened to be unwritten. Pinning it
+    // to a real slug meant the test quietly stopped testing anything the moment
+    // that page was written — and then failed for a reason unrelated to the code.
+    const withProse = buildSystemPrompt("json-formatter")!;
+    expect(withProse).toContain("BACKGROUND");
+
+    state.hideContent = true;
+    try {
+      const prompt = buildSystemPrompt("gst-calculator")!;
+      expect(prompt).toContain("GST Calculator");
+      expect(prompt).not.toContain("BACKGROUND");
+      expect(prompt).not.toContain("ANSWERS ALREADY PUBLISHED");
+    } finally {
+      state.hideContent = false;
+    }
   });
 
   it("tells the model it cannot see the visitor's files or tool input", () => {
