@@ -30,37 +30,46 @@ export default function HomePage() {
           </p>
 
           {/*
-            The claim is a statement about distance travelled, so it is stated as
-            a dimension — the one drawn element in the hero, set inline at the
-            measure of the text rather than boxed up as a picture.
+            The argument, as a proof correction.
+
+            This replaced a dimension line and a separate struck-out note that
+            between them said the same thing three times — once in the paragraph
+            above, once as a measurement, once as a sentence. A correction says
+            it once: the middle of the route is crossed out and the replacement
+            written above it, which is the whole design in one line.
+
+            `del` and `ins` are the right elements for exactly this, so the
+            markup carries the meaning rather than the styling alone.
           */}
-          <figure className="mt-12 max-w-4xl">
-            <div className="dimension">
-              <span className="annot font-medium text-pen-new">
-                Entire journey — 0 bytes transmitted
-              </span>
-            </div>
-            <figcaption className="mt-2.5 flex justify-between gap-4">
-              <span className="annot">File opened here</span>
-              <span className="annot">Result saved here</span>
+          <figure className="mt-14 max-w-3xl">
+            {/*
+              One line across on a wide screen; stacked down on a narrow one,
+              where the phrase cannot fit beside its neighbours and the inserted
+              term would otherwise land on the line above. The arrow turns with
+              the direction of travel.
+            */}
+            <p className="stamp flex flex-col items-start gap-1.5 pt-9 text-[1.3rem] font-semibold leading-[1.4] text-graphite sm:block sm:pt-10 sm:text-[1.85rem]">
+              <span>your file</span>
+              <RouteStep />
+              <del className="correction mt-5 sm:mt-0">
+                <ins className="correction-insert stamp-wide no-underline">this tab</ins>
+                <span className="correction-caret" aria-hidden />
+                someone else&rsquo;s server
+              </del>
+              <RouteStep />
+              <span>your file back</span>
+            </p>
+
+            {/*
+              The dimension measures the route drawn directly above it, and is
+              the only other thing in this block. A revision tag under it said
+              "upload path deleted" — which the strike has already said, so it
+              went.
+            */}
+            <figcaption className="dimension mt-8">
+              <span className="annot font-medium text-pen-new">0 bytes transmitted</span>
             </figcaption>
           </figure>
-
-          {/*
-            The revision note. A drawing records what changed; the single most
-            important fact about this site is a path that is not there, and a
-            struck line says that better than a paragraph does.
-          */}
-          <div className="revision mt-10 max-w-xl">
-            <p className="annot font-medium text-pen-rev">Rev. 00 — upload path deleted</p>
-            <p className="struck mt-2.5 font-mono text-[15px]">
-              your file → someone else&rsquo;s server → your file back
-            </p>
-            <p className="mt-2.5 text-[14px] leading-relaxed text-graphite-soft">
-              The step every other tool site depends on is the step this one removes. Nothing to
-              trust, because nothing is sent.
-            </p>
-          </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -244,5 +253,15 @@ export default function HomePage() {
         }}
       />
     </>
+  );
+}
+
+/** The connector between two terms of the route. Turns with the layout. */
+function RouteStep() {
+  return (
+    <span className="route-step" aria-hidden>
+      <span className="sm:hidden">&darr;</span>
+      <span className="hidden sm:inline">&rarr;</span>
+    </span>
   );
 }

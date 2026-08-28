@@ -233,20 +233,77 @@ body {
   }
 
   /*
-   * The revision note. A drawing records what changed and why, and the single
-   * most important fact about this site is a path that was deleted. One per
-   * page, never more — see rule 2.
+   * The correction.
+   *
+   * A drawing records what changed by striking the old term and writing the new
+   * one above it with a caret pointing at the join. That is exactly the shape of
+   * this site's argument — one leg of the route was removed and replaced — so
+   * the argument is set as a proof correction rather than described in a
+   * paragraph beside a diagram.
+   *
+   * The struck phrase is `nowrap` so it survives the line breaking as one unit,
+   * which keeps the inserted term glued above it at any width.
    */
-  .revision {
-    border-left: 2px solid var(--color-pen-rev);
-    padding-left: 0.875rem;
+  .correction {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    /* Legible on purpose: the correction only lands if you can still read what
+       was crossed out. Faint enough to be clearly cancelled, dark enough to
+       read — this is the term the sentence is about. */
+    color: var(--color-graphite-soft);
   }
 
-  .struck {
-    text-decoration: line-through;
-    text-decoration-color: var(--color-pen-rev);
-    text-decoration-thickness: 1.5px;
+  /* The strike is a drawn rule, not `line-through`, so its weight, colour and
+     height on the x-height are ours to set rather than the browser's. */
+  .correction::after {
+    content: "";
+    position: absolute;
+    inset-inline: -0.08em;
+    /* Measured, not guessed: in Archivo at this weight the x-height centre sits
+       0.769em below the inline box top, so the rule crosses the letters rather
+       than skimming their tops. */
+    top: 0.755em;
+    height: 2px;
+    background: var(--color-pen-rev);
+  }
+
+  .correction-insert {
+    position: absolute;
+    bottom: calc(100% + 0.14em);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.52em;
+    letter-spacing: 0.02em;
+    color: var(--color-pen-new);
+  }
+
+  /* The proofreader's caret, pointing at what the insertion replaces. */
+  .correction-caret {
+    position: absolute;
+    /* Clears the ascenders, which start 0.32em below the box top. */
+    bottom: calc(100% - 0.22em);
+    left: 50%;
+    width: 0.3em;
+    height: 0.3em;
+    border-left: 2px solid var(--color-pen-new);
+    border-top: 2px solid var(--color-pen-new);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  /* The route's connectors, quiet enough to stay under the two named terms.
+     The route runs across the line on a wide screen and down it on a narrow
+     one, so the breathing room follows the direction of travel. */
+  .route-step {
     color: var(--color-graphite-faint);
+    line-height: 1;
+  }
+
+  @media (min-width: 640px) {
+    .route-step {
+      padding-inline: 0.5em;
+    }
   }
 }
 
