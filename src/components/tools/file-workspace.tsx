@@ -4,6 +4,8 @@ import { zipSync } from "fflate";
 import { ArrowDown, ArrowUp, Download, FileIcon, Trash2, Upload } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
+import { ImageStage } from "@/components/tools/image-stage";
+import { LivePreview } from "@/components/tools/live-preview";
 import { OptionsPanel } from "@/components/tools/options-panel";
 import { Button, Notice, Stat } from "@/components/ui/primitives";
 import { formatBytes, type FileOpResult, type InputFile } from "@/lib/engines/file-types";
@@ -160,6 +162,37 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
             }}
           />
         </section>
+
+        {/* The picture, and what the current settings do to it. Both are driven
+            by the registry rather than by a slug switch, so a tool that
+            declares a stage gets them and one that does not is unchanged. */}
+        {tool.stage && files[0] ? (
+          <div
+            className={cn(
+              "grid gap-6",
+              tool.engine === "image" && tool.stage.preview && "lg:grid-cols-2",
+            )}
+          >
+            {/* The source pane is for tools whose input is a picture. Judging a
+                filter, a quality setting or a background removal means comparing
+                against what you started with. A PDF has nothing to show here,
+                so those get the preview alone. */}
+            {tool.engine === "image" ? (
+            <ImageStage
+              tool={tool}
+              file={files[0]}
+              values={options}
+              onChange={(id, value) => {
+                setOptions((current) => ({ ...current, [id]: value }));
+                setResult(null);
+              }}
+            />
+            ) : null}
+            {tool.stage.preview ? (
+              <LivePreview tool={tool} file={files[0]} options={options} />
+            ) : null}
+          </div>
+        ) : null}
 
         {files.length > 0 ? (
           <section className="flex flex-col gap-3">

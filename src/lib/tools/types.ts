@@ -165,6 +165,40 @@ export interface ToolSpec {
    * the registry stays plain data so server components can import it.
    */
   customPanel?: boolean;
+  /**
+   * What the visitor can see and do on the file itself before running anything.
+   *
+   * Typing coordinates into four number boxes and hoping is not a way to crop a
+   * picture, and running a filter blind is not a way to choose one. Where the
+   * tool acts on an image, the image goes on screen.
+   *
+   * Declared here rather than switched on a slug inside a component, so a new
+   * tool gets the behaviour by describing itself.
+   */
+  stage?: {
+    /**
+     * The option ids a dragged selection writes into. Present only on tools
+     * that act on a region. The selection is always written as a percentage of
+     * the image, and `unit` is set to match — a rectangle drawn on screen means
+     * the same thing at any resolution, and pixels would not.
+     */
+    region?: {
+      x: string;
+      y: string;
+      width: string;
+      height: string;
+      /** The option holding percent-or-pixels, forced to percent while dragging. */
+      unit?: string;
+      /** The option holding an aspect-ratio lock, honoured by the selection. */
+      aspect?: string;
+    };
+    /**
+     * Run the real operation on the first file as the options change, and show
+     * what comes out. Not an approximation of the op — the op itself, which is
+     * the only kind of preview that cannot drift from the result.
+     */
+    preview?: boolean;
+  };
   /** Sibling slugs. Drives the internal link matrix and the "related tools" rail. */
   related: string[];
   /** lucide-react icon name, e.g. "FileText". */
