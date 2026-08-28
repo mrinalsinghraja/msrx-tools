@@ -1,7 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
-import logo from "@/../public/brand/msrx-tools-logo.png";
+import { Wordmark } from "@/components/shell/wordmark";
 import { LEGAL_DOCUMENTS } from "@/lib/legal";
 import { SITE } from "@/lib/site";
 import { CATEGORIES } from "@/lib/tools/categories";
@@ -46,9 +45,9 @@ export function SiteFooter() {
         <div className="grid gap-8 border-b border-construction py-8 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <div>
             <p className="annot">Drawn by</p>
-            {/* The supplied logo, unmodified — see the note in site-header.tsx. */}
-            <span className="mt-3 inline-flex border border-construction bg-sheet px-2 py-1">
-              <Image src={logo} alt={SITE.name} className="h-12 w-auto" sizes="74px" />
+            {/* Inked for the sheet — see the note in wordmark.tsx. */}
+            <span className="mt-3 inline-flex">
+              <Wordmark className="h-11 w-auto" />
             </span>
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-graphite-soft">
               {TOOL_COUNT} tools that run entirely in your browser. No uploads, no accounts, no
