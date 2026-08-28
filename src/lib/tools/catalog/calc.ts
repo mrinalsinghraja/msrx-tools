@@ -232,34 +232,38 @@ export const CALC_TOOLS: ToolSpec[] = [
     slug: "bmi-calculator",
     category: "calc",
     title: "BMI Calculator",
-    short: "Body mass index in metric or imperial, with the healthy range",
+    short: "Body mass index in whatever units you think in, with the healthy range",
     keywords: ["bmi calculator", "body mass index", "bmi chart", "healthy weight calculator"],
     io: "form",
     engine: "pure",
     op: "bmi",
     options: [
-      {
-        kind: "select",
-        id: "system",
-        label: "Units",
-        choices: [
-          { value: "metric", label: "Metric — cm and kg" },
-          { value: "imperial", label: "Imperial — feet, inches and pounds" },
-        ],
-        default: "metric",
-      },
       /*
-        A field per system rather than one pair reused. Sharing them meant the
-        units changed but the numbers and the labels did not, so switching to
-        imperial silently read 170 cm as 170 inches and returned a BMI of 1.7.
-        Each field now carries its own unit in the label and its own sensible
-        default, and the pair for the other system is not on screen at all.
+        No system switch. Height and weight each carry their own unit, so
+        feet-and-inches with kilograms — the usual combination in India — is
+        two ordinary answers rather than a contradiction to resolve first.
       */
-      { kind: "number", id: "heightCm", label: "Height (cm)", default: 170, min: 1, step: 0.5, showIf: { id: "system", equals: "metric" } },
-      { kind: "number", id: "weightKg", label: "Weight (kg)", default: 70, min: 1, step: 0.1, showIf: { id: "system", equals: "metric" } },
-      { kind: "number", id: "heightFt", label: "Height (feet)", default: 5, min: 0, max: 8, step: 1, showIf: { id: "system", equals: "imperial" } },
-      { kind: "number", id: "heightIn", label: "and inches", default: 7, min: 0, max: 11, step: 0.5, showIf: { id: "system", equals: "imperial" } },
-      { kind: "number", id: "weightLb", label: "Weight (pounds)", default: 154, min: 1, step: 0.5, showIf: { id: "system", equals: "imperial" } },
+      {
+        kind: "measure",
+        id: "height",
+        label: "Height",
+        quantity: "length",
+        units: ["cm", "ft", "m", "in"],
+        default: 170,
+        min: 0,
+        step: 0.5,
+        compound: { whenUnit: "ft", unit: "in", label: "Inches", default: 0 },
+      },
+      {
+        kind: "measure",
+        id: "weight",
+        label: "Weight",
+        quantity: "mass",
+        units: ["kg", "lb", "st"],
+        default: 70,
+        min: 0,
+        step: 0.1,
+      },
     ],
     related: ["unit-converter", "age-calculator"],
     icon: "Activity",

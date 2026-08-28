@@ -67,6 +67,36 @@ export type OptionSpec =
       default: number;
       unit?: string;
     })
+  /**
+   * A quantity with its own unit picker, rendered as one row: a number box and
+   * a compact unit dropdown beside it.
+   *
+   * There is no "metric or imperial" switch anywhere in this product, on
+   * purpose. Plenty of people give their height in feet and their weight in
+   * kilograms — that combination is normal in India and is not a system at all.
+   * Asking someone to pick a system forces them to answer a question they don't
+   * have, so each measurement carries its own unit instead.
+   *
+   * Values are stored across three keys: `id` holds the number, `${id}Unit` the
+   * chosen unit, and `${id}Sub` the second box when a compound unit is picked.
+   */
+  | (OptionBase & {
+      kind: "measure";
+      /** Which table in `lib/units.ts` the unit symbols come from. */
+      quantity: string;
+      /** The unit symbols offered, in order. The first is the default. */
+      units: string[];
+      default: number;
+      min?: number;
+      max?: number;
+      step?: number;
+      /**
+       * A second box for the remainder, for units people say in two parts.
+       * "5 ft 7 in" is one height, not two, so feet alone would be a worse
+       * question than the one it replaced.
+       */
+      compound?: { whenUnit: string; unit: string; label: string; default: number };
+    })
   | (OptionBase & { kind: "toggle"; default: boolean })
   | (OptionBase & { kind: "text"; default: string; placeholder?: string; maxLength?: number })
   | (OptionBase & { kind: "textarea"; default: string; placeholder?: string; rows?: number })

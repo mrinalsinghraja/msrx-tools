@@ -4,6 +4,7 @@ import { parseColor } from "../pure/css";
 import { bool, num, str, ToolError } from "../types";
 import { formatBytes, parsePageRange, stem, type FileOp, type InputFile } from "../file-types";
 import { loadPdf, PDF_MIME, requireFiles, saveDocument } from "./document";
+import { toPoints } from "@/lib/units";
 
 /**
  * Stamping and framing: page numbers, watermarks, crop boxes, signatures.
@@ -190,10 +191,14 @@ export const cropPdf: FileOp = async (files, options) => {
 
     // Percentages are of that page's own size, so a mixed-size document trims
     // proportionally rather than by an absolute amount that suits only page one.
-    const trimLeft = unit === "percent" ? (box.width * left) / 100 : left;
-    const trimRight = unit === "percent" ? (box.width * right) / 100 : right;
-    const trimTop = unit === "percent" ? (box.height * top) / 100 : top;
-    const trimBottom = unit === "percent" ? (box.height * bottom) / 100 : bottom;
+    // Every other unit is a real length, converted to points once here.
+    const across = (value: number) => (unit === "percent" ? (box.width * value) / 100 : toPoints(value, unit));
+    const down = (value: number) => (unit === "percent" ? (box.height * value) / 100 : toPoints(value, unit));
+
+    const trimLeft = across(left);
+    const trimRight = across(right);
+    const trimTop = down(top);
+    const trimBottom = down(bottom);
 
     const width = box.width - trimLeft - trimRight;
     const height = box.height - trimTop - trimBottom;

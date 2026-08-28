@@ -163,3 +163,95 @@ export function unitChoices(quantity: string): { value: string; label: string }[
     label: `${value} — ${meta.label}`,
   }));
 }
+
+/** Symbol -> readable name, for the compact unit dropdowns. */
+export function unitLabel(quantity: string, unit: string): string {
+  if (quantity === "temperature") return unit;
+  return UNITS[quantity]?.[unit]?.label ?? unit;
+}
+
+/** The subset of a quantity's units a tool chooses to offer, as select choices. */
+export function unitOptions(quantity: string, units: string[]): { value: string; label: string }[] {
+  return units.map((unit) => ({ value: unit, label: unit }));
+}
+
+/**
+ * Reads a `measure` option and returns it in the quantity's base unit.
+ *
+ * The three keys the control writes are read back here, so an engine never has
+ * to know how the picker is laid out — it asks for a height in metres and gets
+ * one whether the person typed centimetres, feet and inches, or metres.
+ */
+export function measureIn(
+  quantity: string,
+  values: Record<string, unknown>,
+  id: string,
+): number {
+  const table = UNITS[quantity];
+  if (!table) throw new ToolError(`Unknown quantity “${quantity}”.`);
+
+  const unit = String(values[`${id}Unit`] ?? Object.keys(table)[0]);
+  const entry = table[unit];
+  if (!entry) throw new ToolError(`“${unit}” isn't a unit of ${quantity}.`);
+
+  const amount = Number(values[id] ?? 0);
+  let total = (Number.isFinite(amount) ? amount : 0) * entry.factor;
+
+  // The remainder box, when the chosen unit has one. `ft` carries `in`.
+  const sub = values[`${id}Sub`];
+  if (sub !== undefined && COMPOUND[unit]) {
+    const rest = Number(sub);
+    if (Number.isFinite(rest)) total += rest * table[COMPOUND[unit]].factor;
+  }
+  return total;
+}
+
+/** Units people say in two parts, and the unit the second part is in. */
+const COMPOUND: Record<string, string> = { ft: "in" };
+
+/**
+ * A length, in PDF points.
+ *
+ * PDF's own unit is 1/72 inch and nothing else in the format is metric, so
+ * anything a person types in millimetres has to land here before it can be
+ * given to pdf-lib. "points" is accepted as a unit name so a tool can offer it
+ * alongside real units without a special case at the call site.
+ */
+export function toPoints(value: number, unit: string): number {
+  if (unit === "points" || unit === "pt") return value;
+  const entry = UNITS.length[unit];
+  if (!entry) throw new ToolError(`“${unit}” isn't a length.`);
+  return (value * entry.factor) / 0.0254 * 72;
+}
+
+/**
+ * Rewrites a measurement in a different unit without changing what it measures.
+ *
+ * Changing the unit picker must restate the quantity, never reinterpret the
+ * number beside it. Leaving 170 alone when the unit goes from centimetres to
+ * feet claims the person is 170 feet tall — the same mistake the metric/imperial
+ * switch used to make, reintroduced one level down.
+ */
+export function restateMeasure(
+  quantity: string,
+  amount: number,
+  sub: number,
+  fromUnit: string,
+  toUnit: string,
+): { amount: number; sub: number } {
+  const table = UNITS[quantity];
+  if (!table || !table[fromUnit] || !table[toUnit]) return { amount, sub };
+
+  const fromSub = COMPOUND[fromUnit];
+  const base =
+    (Number.isFinite(amount) ? amount : 0) * table[fromUnit].factor +
+    (fromSub && Number.isFinite(sub) ? sub * table[fromSub].factor : 0);
+
+  const toSub = COMPOUND[toUnit];
+  if (toSub) {
+    const whole = Math.floor(base / table[toUnit].factor);
+    const rest = (base - whole * table[toUnit].factor) / table[toSub].factor;
+    return { amount: whole, sub: Math.round(rest * 10) / 10 };
+  }
+  return { amount: Math.round((base / table[toUnit].factor) * 100) / 100, sub: 0 };
+}

@@ -66,7 +66,15 @@ export async function runFileTool(
 /** Every option's declared default, which is the state a tool page opens in. */
 export function defaultOptions(tool: ToolSpec): OptionValues {
   const values: OptionValues = {};
-  for (const option of tool.options) values[option.id] = option.default;
+  for (const option of tool.options) {
+    values[option.id] = option.default;
+    // A measure is three values behind one control: the number, the unit, and
+    // the remainder box that a compound unit brings with it.
+    if (option.kind === "measure") {
+      values[`${option.id}Unit`] = option.units[0];
+      if (option.compound) values[`${option.id}Sub`] = option.compound.default;
+    }
+  }
   return values;
 }
 

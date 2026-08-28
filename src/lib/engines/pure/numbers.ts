@@ -1,4 +1,4 @@
-import { convertUnit, TEMPERATURE, UNITS } from "@/lib/units";
+import { convertUnit, measureIn, TEMPERATURE, UNITS } from "@/lib/units";
 
 import { bool, num, str, ToolError, type OpResult, type PureOp } from "../types";
 
@@ -363,17 +363,15 @@ export const tip: PureOp = (_input, options): OpResult => {
 };
 
 export const bmi: PureOp = (_input, options): OpResult => {
-  const metric = str(options, "system", "metric") === "metric";
-
   /*
-    Each system has its own fields. They used to share one height and one
-    weight, which meant switching to imperial kept the metric numbers and read
-    170 cm as 170 inches — a BMI of 1.7 and a "healthy range" of 760–1023 lb.
+    Height and weight each arrive with their own unit, so the engine asks for
+    metres and kilograms and lets `measureIn` deal with whatever was typed.
+    There is no system to agree with itself, which is what used to go wrong:
+    switching to imperial kept the metric numbers and read 170 cm as 170
+    inches — a BMI of 1.7 and a "healthy range" of 760–1023 lb.
   */
-  const metres = metric
-    ? num(options, "heightCm", 0) / 100
-    : (num(options, "heightFt", 0) * 12 + num(options, "heightIn", 0)) * 0.0254;
-  const kilos = metric ? num(options, "weightKg", 0) : num(options, "weightLb", 0) * 0.45359237;
+  const metres = measureIn("length", options, "height");
+  const kilos = measureIn("mass", options, "weight");
 
   if (metres <= 0 || kilos <= 0) throw new ToolError("Enter a height and weight above zero.");
 
@@ -384,11 +382,16 @@ export const bmi: PureOp = (_input, options): OpResult => {
 
   const healthyLow = 18.5 * metres ** 2;
   const healthyHigh = 24.9 * metres ** 2;
-  const unit = metric ? "kg" : "lb";
-  const toDisplay = (kg: number) => round(metric ? kg : kg / 0.45359237, 1);
-  const heightLabel = metric
-    ? `${round(metres * 100, 1)} cm`
-    : `${num(options, "heightFt", 0)} ft ${num(options, "heightIn", 0)} in`;
+  // The range is reported back in the units the person actually typed, so it
+  // reads as an answer to their question rather than a conversion of it.
+  const weightUnit = str(options, "weightUnit", "kg");
+  const heightUnit = str(options, "heightUnit", "cm");
+  const unit = weightUnit;
+  const toDisplay = (kg: number) => round(kg / UNITS.mass[weightUnit].factor, 1);
+  const heightLabel =
+    heightUnit === "ft"
+      ? `${num(options, "height", 0)} ft ${num(options, "heightSub", 0)} in`
+      : `${round(metres / UNITS.length[heightUnit].factor, 1)} ${heightUnit}`;
 
   return {
     output: [

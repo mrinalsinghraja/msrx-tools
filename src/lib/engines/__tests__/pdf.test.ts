@@ -247,6 +247,37 @@ describe("crop", () => {
     expect(box.width).toBeCloseTo(595, 0);
   });
 
+  it("crops by a real length as well as by percent", async () => {
+    // 10 mm is 28.35 pt. A person setting a print margin thinks in millimetres,
+    // not in seventy-seconds of an inch.
+    const result = await cropPdf([threePages], {
+      unit: "mm",
+      top: 10,
+      bottom: 10,
+      left: 0,
+      right: 0,
+      pages: "all",
+    });
+    const document = await PDFDocument.load(result.files[0].bytes);
+    const box = document.getPage(0).getCropBox();
+    expect(box.height).toBeCloseTo(842 - 2 * 28.3465, 1);
+    expect(box.width).toBeCloseTo(595, 0);
+  });
+
+  it("crops the same amount however the length is written", async () => {
+    const sides = { top: 0, bottom: 0, left: 0, right: 0, pages: "all" };
+    const inInches = await cropPdf([threePages], { ...sides, unit: "in", top: 1 });
+    const inMillimetres = await cropPdf([threePages], { ...sides, unit: "mm", top: 25.4 });
+    const inPoints = await cropPdf([threePages], { ...sides, unit: "points", top: 72 });
+
+    const heightOf = async (bytes: Uint8Array) =>
+      (await PDFDocument.load(bytes)).getPage(0).getCropBox().height;
+
+    const inch = await heightOf(inInches.files[0].bytes);
+    expect(await heightOf(inMillimetres.files[0].bytes)).toBeCloseTo(inch, 1);
+    expect(await heightOf(inPoints.files[0].bytes)).toBeCloseTo(inch, 1);
+  });
+
   it("insists on at least one non-zero margin", async () => {
     await expect(
       cropPdf([threePages], { unit: "percent", top: 0, bottom: 0, left: 0, right: 0, pages: "all" }),

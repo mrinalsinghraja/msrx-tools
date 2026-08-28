@@ -3,6 +3,7 @@ import { PDFDocument } from "pdf-lib";
 import { bool, num, str, ToolError } from "../types";
 import { formatBytes, stem, type FileOp, type InputFile } from "../file-types";
 import { PDF_MIME, requireFiles, saveDocument } from "./document";
+import { toPoints } from "@/lib/units";
 
 /**
  * Images into a PDF.
@@ -34,7 +35,9 @@ export const jpgToPdf: FileOp = async (files, options, onProgress) => {
 
   const document = await PDFDocument.create();
   const sizeName = str(options, "pageSize", "a4");
-  const margin = num(options, "margin", 24);
+  // The margin arrives as a real length with its own unit; PDF only speaks
+  // points, so it is converted once here.
+  const margin = toPoints(num(options, "margin", 8), str(options, "marginUnit", "mm"));
   const orientation = str(options, "orientation", "auto");
 
   for (const [index, file] of files.entries()) {

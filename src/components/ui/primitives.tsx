@@ -117,17 +117,21 @@ export function Select({
   choices,
   id,
   className,
+  ariaLabel,
 }: {
   value: string;
   onValueChange: (value: string) => void;
   choices: { value: string; label: string }[];
   id?: string;
   className?: string;
+  /** For a select with no visible label of its own, such as a unit picker. */
+  ariaLabel?: string;
 }) {
   return (
     <SelectPrimitive.Root value={value} onValueChange={onValueChange}>
       <SelectPrimitive.Trigger
         id={id}
+        aria-label={ariaLabel}
         className={cn(
           "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-construction bg-sheet px-3",
           "text-left text-sm text-graphite transition-colors hover:border-construction-strong",

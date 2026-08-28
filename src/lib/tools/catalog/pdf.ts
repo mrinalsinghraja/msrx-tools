@@ -302,7 +302,18 @@ export const PDF_TOOLS: ToolSpec[] = [
         default: "auto",
         showIf: { id: "pageSize", equals: "a4" },
       },
-      { kind: "slider", id: "margin", label: "Margin", min: 0, max: 96, step: 4, default: 24, unit: "pt" },
+      {
+        kind: "measure",
+        id: "margin",
+        label: "Margin",
+        quantity: "length",
+        units: ["mm", "cm", "in"],
+        default: 8,
+        min: 0,
+        max: 100,
+        step: 1,
+        help: "White space left around each image.",
+      },
       { kind: "toggle", id: "titleFromFirst", label: "Name the PDF after the first image", default: true },
     ],
     related: ["pdf-to-jpg", "merge-pdf", "compress-pdf"],
@@ -443,16 +454,25 @@ export const PDF_TOOLS: ToolSpec[] = [
         kind: "select",
         id: "unit",
         label: "Measure in",
+        /*
+          One unit governs all four trims, because nobody crops the top in
+          millimetres and the left in percent. Percent has to stay a choice
+          rather than a length: it is relative to each page's own size, which is
+          the only sane behaviour on a document of mixed page sizes.
+        */
         choices: [
           { value: "percent", label: "Percent of each page" },
+          { value: "mm", label: "Millimetres" },
+          { value: "cm", label: "Centimetres" },
+          { value: "in", label: "Inches" },
           { value: "points", label: "Points (72 per inch)" },
         ],
         default: "percent",
       },
-      { kind: "number", id: "top", label: "Trim from top", default: 5, min: 0, max: 45, step: 0.5 },
-      { kind: "number", id: "bottom", label: "Trim from bottom", default: 5, min: 0, max: 45, step: 0.5 },
-      { kind: "number", id: "left", label: "Trim from left", default: 5, min: 0, max: 45, step: 0.5 },
-      { kind: "number", id: "right", label: "Trim from right", default: 5, min: 0, max: 45, step: 0.5 },
+      { kind: "number", id: "top", label: "Trim from top", default: 5, min: 0, max: 500, step: 0.5 },
+      { kind: "number", id: "bottom", label: "Trim from bottom", default: 5, min: 0, max: 500, step: 0.5 },
+      { kind: "number", id: "left", label: "Trim from left", default: 5, min: 0, max: 500, step: 0.5 },
+      { kind: "number", id: "right", label: "Trim from right", default: 5, min: 0, max: 500, step: 0.5 },
       pageRangeOption(),
     ],
     related: ["rotate-pdf", "add-page-numbers", "pdf-to-jpg"],

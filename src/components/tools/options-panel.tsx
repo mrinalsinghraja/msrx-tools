@@ -4,6 +4,7 @@ import { useId } from "react";
 
 import { Field, Input, Select, Slider, Switch, Textarea } from "@/components/ui/primitives";
 import { isOptionVisible } from "@/lib/engines/run";
+import { restateMeasure, unitOptions } from "@/lib/units";
 import type { OptionSpec, OptionValue, OptionValues } from "@/lib/tools/types";
 
 /**
@@ -90,6 +91,71 @@ function OptionControl({
           {option.help ? <p className="text-xs leading-snug text-graphite-faint">{option.help}</p> : null}
         </div>
       );
+
+    /*
+      A quantity and its unit, on one line. There is no metric/imperial switch
+      in this product: each measurement carries its own unit, so a height in
+      feet and a weight in kilograms — normal in India — is just two answers,
+      not a contradiction the person has to resolve first.
+    */
+    case "measure": {
+      const unit = String(values[`${option.id}Unit`] ?? option.units[0]);
+      const compound = option.compound && option.compound.whenUnit === unit ? option.compound : null;
+      return (
+        <Field label={option.label} help={option.help} htmlFor={controlId}>
+          <div className="flex items-start gap-2">
+            <Input
+              id={controlId}
+              type="number"
+              inputMode="decimal"
+              className="min-w-0 flex-1"
+              value={String(value ?? "")}
+              min={option.min}
+              max={option.max}
+              step={option.step}
+              onChange={(event) => onChange(option.id, event.target.value)}
+            />
+            {compound ? (
+              <Input
+                type="number"
+                inputMode="decimal"
+                aria-label={compound.label}
+                className="min-w-0 flex-1"
+                value={String(values[`${option.id}Sub`] ?? compound.default)}
+                min={0}
+                step={option.step}
+                onChange={(event) => onChange(`${option.id}Sub`, event.target.value)}
+              />
+            ) : null}
+            <Select
+              value={unit}
+              ariaLabel={`${option.label} unit`}
+              className="w-24 shrink-0"
+              choices={unitOptions(option.quantity, option.units)}
+              onValueChange={(next) => {
+                // Restate the measurement in the new unit rather than leaving
+                // the number to mean something else beside it.
+                const restated = restateMeasure(
+                  option.quantity,
+                  Number(values[option.id] ?? option.default),
+                  Number(values[`${option.id}Sub`] ?? 0),
+                  unit,
+                  next,
+                );
+                onChange(`${option.id}Unit`, next);
+                onChange(option.id, restated.amount);
+                onChange(`${option.id}Sub`, restated.sub);
+              }}
+            />
+          </div>
+          {compound ? (
+            <p className="mt-1.5 text-xs text-graphite-faint">
+              Feet in the first box, inches in the second.
+            </p>
+          ) : null}
+        </Field>
+      );
+    }
 
     case "number":
       return (

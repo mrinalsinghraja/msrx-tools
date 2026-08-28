@@ -170,26 +170,27 @@ describe("tax and pricing", () => {
 
 describe("health and geometry", () => {
   it("computes BMI in metric", async () => {
-    const result = await run(bmi, "", { system: "metric", heightCm: 180, weightKg: 75 });
+    const result = await run(bmi, "", { height: 180, heightUnit: "cm", weight: 75, weightUnit: "kg" });
     expect(result.output).toContain("BMI                  23.1");
     expect(result.output).toContain("Healthy weight");
   });
 
   it("agrees between metric and imperial for the same body", async () => {
-    const metric = await run(bmi, "", { system: "metric", heightCm: 180, weightKg: 75 });
-    // 180 cm is 5 ft 10.866 in. Each system has its own fields, so this is the
-    // same body typed the way somebody using that system would type it.
+    const metric = await run(bmi, "", { height: 180, heightUnit: "cm", weight: 75, weightUnit: "kg" });
+    // 180 cm is 5 ft 10.866 in. Each measurement carries its own unit, so this
+    // is the same body typed the way somebody else would type it.
     const imperial = await run(bmi, "", {
-      system: "imperial",
-      heightFt: 5,
-      heightIn: 10.866,
-      weightLb: 165.347,
+      height: 5,
+      heightSub: 10.866,
+      heightUnit: "ft",
+      weight: 165.347,
+      weightUnit: "lb",
     });
     expect(imperial.stats?.[0].value).toBe(metric.stats?.[0].value);
   });
 
   it("states that BMI is not a diagnosis", async () => {
-    const result = await run(bmi, "", { heightCm: 170, weightKg: 70 });
+    const result = await run(bmi, "", { height: 170, heightUnit: "cm", weight: 70, weightUnit: "kg" });
     expect(result.note).toMatch(/not a diagnosis/i);
   });
 

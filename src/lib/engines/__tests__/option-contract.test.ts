@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { getPureOp } from "@/lib/engines/pure";
-import { isOptionVisible } from "@/lib/engines/run";
+import { defaultOptions, isOptionVisible } from "@/lib/engines/run";
+import { restateMeasure } from "@/lib/units";
 import { TOOLS } from "@/lib/tools/registry";
 import type { OptionSpec, OptionValues, ToolSpec } from "@/lib/tools/types";
 
@@ -91,9 +92,9 @@ const REQUIRED: Record<string, OptionValues> = {
 
 /** Combinations worth trying: every choice of every select, others at default. */
 function scenarios(tool: ToolSpec): OptionValues[] {
-  const base: OptionValues = {};
-  for (const option of tool.options) base[option.id] = option.default as never;
-  Object.assign(base, REQUIRED[tool.slug] ?? {});
+  // The app's own defaults, so a measure's unit and remainder keys are seeded
+  // exactly as the panel would seed them.
+  const base: OptionValues = { ...defaultOptions(tool), ...(REQUIRED[tool.slug] ?? {}) };
 
   const out: OptionValues[] = [base];
   for (const option of tool.options) {
@@ -101,13 +102,22 @@ function scenarios(tool: ToolSpec): OptionValues[] {
       for (const choice of option.choices) out.push({ ...base, [option.id]: choice.value });
     } else if (option.kind === "toggle") {
       out.push({ ...base, [option.id]: !option.default });
+    } else if (option.kind === "measure") {
+      // Every unit a measurement offers, since changing one is exactly the move
+      // that used to silently reinterpret the number beside it.
+      for (const unit of option.units) out.push({ ...base, [`${option.id}Unit`]: unit });
     }
   }
   return out;
 }
 
 function visibleIds(options: OptionSpec[], values: OptionValues): string[] {
-  return options.filter((option) => isOptionVisible(option, values)).map((option) => option.id);
+  return options.filter((option) => isOptionVisible(option, values)).flatMap((option) =>
+    // A measure is one control over three keys. An engine that reads the number
+    // and ignores the unit is the original bug wearing a new hat, so the unit
+    // key is required too.
+    option.kind === "measure" ? [option.id, `${option.id}Unit`] : [option.id],
+  );
 }
 
 const PURE = TOOLS.filter((tool) => tool.engine === "pure");
@@ -123,9 +133,7 @@ describe("every pure tool", () => {
     for (const tool of PURE) {
       const op = getPureOp(tool.op);
       if (!op) continue;
-      const values: OptionValues = {};
-      for (const option of tool.options) values[option.id] = option.default as never;
-      Object.assign(values, REQUIRED[tool.slug] ?? {});
+      const values: OptionValues = { ...defaultOptions(tool), ...(REQUIRED[tool.slug] ?? {}) };
       try {
         const result = await op(INPUT[tool.slug] ?? DEFAULT_INPUT, values);
         if (!result.output && !result.extra) broken.push(`${tool.slug}: empty result`);
@@ -183,31 +191,63 @@ describe("unit-bearing calculators", () => {
     const quantities = (tool.options.find((o) => o.id === "quantity") as { choices: { value: string }[] }).choices;
 
     for (const { value: quantity } of quantities) {
-      const values: OptionValues = {};
-      for (const option of tool.options) values[option.id] = option.default as never;
-      values.quantity = quantity;
+      const values: OptionValues = { ...defaultOptions(tool), quantity };
       const result = await op("", values);
       expect(result.output, quantity).toMatch(/=/);
     }
   });
 
-  it("reads an imperial BMI as feet, inches and pounds", async () => {
+  it("restates a measurement when its unit changes, rather than reinterpreting it", () => {
+    // 170 cm is 5 ft 6.9 in. Switching the picker must not leave 170 sitting
+    // beside "ft", which would claim a height of 170 feet.
+    expect(restateMeasure("length", 170, 0, "cm", "ft")).toEqual({ amount: 5, sub: 6.9 });
+    expect(restateMeasure("length", 5, 7, "ft", "cm")).toEqual({ amount: 170.18, sub: 0 });
+    expect(restateMeasure("mass", 70, 0, "kg", "lb").amount).toBeCloseTo(154.32, 1);
+
+    // Round-tripping through a compound unit keeps the same body.
+    const there = restateMeasure("length", 183, 0, "cm", "ft");
+    const back = restateMeasure("length", there.amount, there.sub, "ft", "cm");
+    expect(back.amount).toBeCloseTo(183, 0);
+  });
+
+  it("takes a height and a weight in unrelated units", async () => {
     const op = getPureOp("bmi")!;
-    const metric = await op("", { system: "metric", heightCm: 170, weightKg: 70 });
-    const imperial = await op("", {
-      system: "imperial",
-      heightFt: 5,
-      heightIn: 7,
-      weightLb: 154,
+    const bmiOf = (out: string) => Number(out.match(/BMI\s+([\d.]+)/)![1]);
+
+    const centimetres = await op("", {
+      height: 170,
+      heightUnit: "cm",
+      weight: 70,
+      weightUnit: "kg",
     });
 
-    // 5'7" and 154 lb is 170 cm and 70 kg give or take a rounding place, so the
-    // two readings have to land on each other. Before the fix the imperial one
-    // was 1.7, because 170 was being read as inches.
-    const bmiOf = (out: string) => Number(out.match(/BMI\s+([\d.]+)/)![1]);
-    expect(bmiOf(metric.output!)).toBeCloseTo(24.2, 1);
-    expect(bmiOf(imperial.output!)).toBeGreaterThan(23.5);
-    expect(bmiOf(imperial.output!)).toBeLessThan(24.5);
-    expect(imperial.output).toContain("lb at 5 ft 7 in");
+    // Feet and inches for the height, kilograms for the weight. This pairing is
+    // ordinary in India and belongs to neither "system", which is why the
+    // system switch is gone.
+    const feetAndKilos = await op("", {
+      height: 5,
+      heightSub: 7,
+      heightUnit: "ft",
+      weight: 70,
+      weightUnit: "kg",
+    });
+
+    const feetAndPounds = await op("", {
+      height: 5,
+      heightSub: 7,
+      heightUnit: "ft",
+      weight: 154,
+      weightUnit: "lb",
+    });
+
+    expect(bmiOf(centimetres.output!)).toBeCloseTo(24.2, 1);
+    // 5'7" is 170.18 cm, so all three land on the same body.
+    expect(bmiOf(feetAndKilos.output!)).toBeCloseTo(24.2, 1);
+    expect(bmiOf(feetAndPounds.output!)).toBeCloseTo(24.1, 1);
+
+    // The healthy range answers in the units that were typed, not a conversion.
+    expect(centimetres.output).toContain("kg at 170 cm");
+    expect(feetAndKilos.output).toContain("kg at 5 ft 7 in");
+    expect(feetAndPounds.output).toContain("lb at 5 ft 7 in");
   });
 });
