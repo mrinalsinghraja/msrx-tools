@@ -1,4 +1,9 @@
+import { convertUnit, TEMPERATURE, UNITS } from "@/lib/units";
+
 import { bool, num, str, ToolError, type OpResult, type PureOp } from "../types";
+
+// Re-exported so the engine stays the single import site for callers and tests.
+export { convertUnit, UNITS };
 
 /**
  * Units, money and number notation.
@@ -21,133 +26,13 @@ function money(value: number): string {
 /* Units                                                                */
 /* ------------------------------------------------------------------ */
 
-/** Factor to the quantity's base unit: metres, kilograms, m², litres, and so on. */
-export const UNITS: Record<string, Record<string, { factor: number; label: string }>> = {
-  length: {
-    nm: { factor: 1e-9, label: "nanometre" },
-    mm: { factor: 0.001, label: "millimetre" },
-    cm: { factor: 0.01, label: "centimetre" },
-    m: { factor: 1, label: "metre" },
-    km: { factor: 1000, label: "kilometre" },
-    in: { factor: 0.0254, label: "inch" },
-    ft: { factor: 0.3048, label: "foot" },
-    yd: { factor: 0.9144, label: "yard" },
-    mi: { factor: 1609.344, label: "mile" },
-    nmi: { factor: 1852, label: "nautical mile" },
-  },
-  mass: {
-    mg: { factor: 1e-6, label: "milligram" },
-    g: { factor: 0.001, label: "gram" },
-    kg: { factor: 1, label: "kilogram" },
-    t: { factor: 1000, label: "tonne" },
-    oz: { factor: 0.028349523125, label: "ounce" },
-    lb: { factor: 0.45359237, label: "pound" },
-    st: { factor: 6.35029318, label: "stone" },
-  },
-  area: {
-    "mm2": { factor: 1e-6, label: "square millimetre" },
-    "cm2": { factor: 1e-4, label: "square centimetre" },
-    "m2": { factor: 1, label: "square metre" },
-    "km2": { factor: 1e6, label: "square kilometre" },
-    ha: { factor: 10_000, label: "hectare" },
-    acre: { factor: 4046.8564224, label: "acre" },
-    "ft2": { factor: 0.09290304, label: "square foot" },
-    "yd2": { factor: 0.83612736, label: "square yard" },
-  },
-  volume: {
-    ml: { factor: 0.001, label: "millilitre" },
-    l: { factor: 1, label: "litre" },
-    "m3": { factor: 1000, label: "cubic metre" },
-    tsp: { factor: 0.00492892159375, label: "teaspoon (US)" },
-    tbsp: { factor: 0.01478676478125, label: "tablespoon (US)" },
-    cup: { factor: 0.2365882365, label: "cup (US)" },
-    pt: { factor: 0.473176473, label: "pint (US)" },
-    qt: { factor: 0.946352946, label: "quart (US)" },
-    gal: { factor: 3.785411784, label: "gallon (US)" },
-    impgal: { factor: 4.54609, label: "gallon (imperial)" },
-  },
-  speed: {
-    "m/s": { factor: 1, label: "metre per second" },
-    "km/h": { factor: 0.2777777778, label: "kilometre per hour" },
-    mph: { factor: 0.44704, label: "mile per hour" },
-    kn: { factor: 0.5144444444, label: "knot" },
-  },
-  data: {
-    B: { factor: 1, label: "byte" },
-    KB: { factor: 1000, label: "kilobyte" },
-    MB: { factor: 1e6, label: "megabyte" },
-    GB: { factor: 1e9, label: "gigabyte" },
-    TB: { factor: 1e12, label: "terabyte" },
-    KiB: { factor: 1024, label: "kibibyte" },
-    MiB: { factor: 1024 ** 2, label: "mebibyte" },
-    GiB: { factor: 1024 ** 3, label: "gibibyte" },
-    TiB: { factor: 1024 ** 4, label: "tebibyte" },
-  },
-  time: {
-    ms: { factor: 0.001, label: "millisecond" },
-    s: { factor: 1, label: "second" },
-    min: { factor: 60, label: "minute" },
-    h: { factor: 3600, label: "hour" },
-    d: { factor: 86_400, label: "day" },
-    wk: { factor: 604_800, label: "week" },
-    yr: { factor: 31_557_600, label: "year (365.25 days)" },
-  },
-  pressure: {
-    Pa: { factor: 1, label: "pascal" },
-    kPa: { factor: 1000, label: "kilopascal" },
-    bar: { factor: 100_000, label: "bar" },
-    psi: { factor: 6894.757293168, label: "pound per square inch" },
-    atm: { factor: 101_325, label: "atmosphere" },
-    mmHg: { factor: 133.322387415, label: "millimetre of mercury" },
-  },
-  energy: {
-    J: { factor: 1, label: "joule" },
-    kJ: { factor: 1000, label: "kilojoule" },
-    cal: { factor: 4.184, label: "calorie" },
-    kcal: { factor: 4184, label: "kilocalorie" },
-    Wh: { factor: 3600, label: "watt hour" },
-    kWh: { factor: 3_600_000, label: "kilowatt hour" },
-  },
-};
-
-/** Temperature is affine, not a simple ratio, so it gets its own path. */
-const TEMPERATURE = ["C", "F", "K"] as const;
-
-function toCelsius(value: number, unit: string): number {
-  if (unit === "F") return (value - 32) * (5 / 9);
-  if (unit === "K") return value - 273.15;
-  return value;
-}
-
-function fromCelsius(celsius: number, unit: string): number {
-  if (unit === "F") return celsius * (9 / 5) + 32;
-  if (unit === "K") return celsius + 273.15;
-  return celsius;
-}
-
-export function convertUnit(quantity: string, value: number, from: string, to: string): number {
-  if (quantity === "temperature") {
-    if (!TEMPERATURE.includes(from as never) || !TEMPERATURE.includes(to as never)) {
-      throw new ToolError("Temperature units are C, F and K.");
-    }
-    return fromCelsius(toCelsius(value, from), to);
-  }
-
-  const table = UNITS[quantity];
-  if (!table) throw new ToolError(`Unknown quantity “${quantity}”.`);
-  const source = table[from];
-  const target = table[to];
-  if (!source) throw new ToolError(`“${from}” isn't a unit of ${quantity}. Try one of: ${Object.keys(table).join(", ")}.`);
-  if (!target) throw new ToolError(`“${to}” isn't a unit of ${quantity}. Try one of: ${Object.keys(table).join(", ")}.`);
-
-  return (value * source.factor) / target.factor;
-}
-
 export const unitConvert: PureOp = (_input, options): OpResult => {
   const quantity = str(options, "quantity", "length");
   const value = num(options, "value", 1);
-  const from = str(options, "from", "m");
-  const to = str(options, "to", "ft");
+  // One picker pair per quantity, so the units on screen always belong to the
+  // quantity being measured. See the note in catalog/calc.ts.
+  const from = str(options, `from_${quantity}`, "m");
+  const to = str(options, `to_${quantity}`, "ft");
   const precision = Math.min(12, Math.max(0, num(options, "precision", 6)));
 
   const result = convertUnit(quantity, value, from, to);
@@ -479,13 +364,19 @@ export const tip: PureOp = (_input, options): OpResult => {
 
 export const bmi: PureOp = (_input, options): OpResult => {
   const metric = str(options, "system", "metric") === "metric";
-  const height = num(options, "height", 0);
-  const weight = num(options, "weight", 0);
 
-  if (height <= 0 || weight <= 0) throw new ToolError("Enter a height and weight above zero.");
+  /*
+    Each system has its own fields. They used to share one height and one
+    weight, which meant switching to imperial kept the metric numbers and read
+    170 cm as 170 inches — a BMI of 1.7 and a "healthy range" of 760–1023 lb.
+  */
+  const metres = metric
+    ? num(options, "heightCm", 0) / 100
+    : (num(options, "heightFt", 0) * 12 + num(options, "heightIn", 0)) * 0.0254;
+  const kilos = metric ? num(options, "weightKg", 0) : num(options, "weightLb", 0) * 0.45359237;
 
-  const metres = metric ? height / 100 : height * 0.0254;
-  const kilos = metric ? weight : weight * 0.45359237;
+  if (metres <= 0 || kilos <= 0) throw new ToolError("Enter a height and weight above zero.");
+
   const value = kilos / metres ** 2;
 
   const category =
@@ -495,12 +386,15 @@ export const bmi: PureOp = (_input, options): OpResult => {
   const healthyHigh = 24.9 * metres ** 2;
   const unit = metric ? "kg" : "lb";
   const toDisplay = (kg: number) => round(metric ? kg : kg / 0.45359237, 1);
+  const heightLabel = metric
+    ? `${round(metres * 100, 1)} cm`
+    : `${num(options, "heightFt", 0)} ft ${num(options, "heightIn", 0)} in`;
 
   return {
     output: [
       `BMI                  ${round(value, 1)}`,
       `Category             ${category}`,
-      `Healthy range        ${toDisplay(healthyLow)}–${toDisplay(healthyHigh)} ${unit} at this height`,
+      `Healthy range        ${toDisplay(healthyLow)}–${toDisplay(healthyHigh)} ${unit} at ${heightLabel}`,
     ].join("\n"),
     stats: [
       { label: "BMI", value: String(round(value, 1)) },
@@ -559,21 +453,36 @@ export const baseConvert: PureOp = (input, options): OpResult => {
     throw new ToolError("That number is too large to convert exactly — it exceeds JavaScript's safe integer range.");
   }
 
+  /*
+    Grouping used to be applied to the binary line alone, and only inside the
+    common-bases block — so with the common bases turned off the switch was on
+    screen and did nothing at all. Every line is grouped now: fours for the
+    bases people read in nibbles, threes for the ones they read in threes.
+  */
+  const grouped = bool(options, "group", true);
+  const group = (text: string, size: number) => {
+    if (!grouped || text.length <= size) return text;
+    const parts: string[] = [];
+    for (let end = text.length; end > 0; end -= size) {
+      parts.unshift(text.slice(Math.max(0, end - size), end));
+    }
+    return parts.join(" ");
+  };
+
   const lines: string[] = [];
   if (bool(options, "common", true)) {
-    let binary = value.toString(2);
-    if (bool(options, "group", true)) binary = binary.replace(/\B(?=(\d{4})+(?!\d))/g, " ");
     lines.push(
-      `Binary (2)       ${binary}`,
-      `Octal (8)        ${value.toString(8)}`,
-      `Decimal (10)     ${value.toString(10)}`,
-      `Hexadecimal (16) ${value.toString(16).toUpperCase()}`,
+      `Binary (2)       ${group(value.toString(2), 4)}`,
+      `Octal (8)        ${group(value.toString(8), 3)}`,
+      `Decimal (10)     ${group(value.toString(10), 3)}`,
+      `Hexadecimal (16) ${group(value.toString(16).toUpperCase(), 4)}`,
     );
   }
 
   const to = Math.min(36, Math.max(2, num(options, "to", 2)));
   if (![2, 8, 10, 16].includes(to) || !bool(options, "common", true)) {
-    lines.push(`Base ${to}${" ".repeat(Math.max(1, 11 - String(to).length))}${value.toString(to).toUpperCase()}`);
+    const digits = group(value.toString(to).toUpperCase(), to === 8 || to === 10 ? 3 : 4);
+    lines.push(`Base ${to}${" ".repeat(Math.max(1, 11 - String(to).length))}${digits}`);
   }
 
   return {

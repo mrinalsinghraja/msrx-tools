@@ -170,19 +170,26 @@ describe("tax and pricing", () => {
 
 describe("health and geometry", () => {
   it("computes BMI in metric", async () => {
-    const result = await run(bmi, "", { system: "metric", height: 180, weight: 75 });
+    const result = await run(bmi, "", { system: "metric", heightCm: 180, weightKg: 75 });
     expect(result.output).toContain("BMI                  23.1");
     expect(result.output).toContain("Healthy weight");
   });
 
   it("agrees between metric and imperial for the same body", async () => {
-    const metric = await run(bmi, "", { system: "metric", height: 180, weight: 75 });
-    const imperial = await run(bmi, "", { system: "imperial", height: 70.866, weight: 165.347 });
+    const metric = await run(bmi, "", { system: "metric", heightCm: 180, weightKg: 75 });
+    // 180 cm is 5 ft 10.866 in. Each system has its own fields, so this is the
+    // same body typed the way somebody using that system would type it.
+    const imperial = await run(bmi, "", {
+      system: "imperial",
+      heightFt: 5,
+      heightIn: 10.866,
+      weightLb: 165.347,
+    });
     expect(imperial.stats?.[0].value).toBe(metric.stats?.[0].value);
   });
 
   it("states that BMI is not a diagnosis", async () => {
-    const result = await run(bmi, "", { height: 170, weight: 70 });
+    const result = await run(bmi, "", { heightCm: 170, weightKg: 70 });
     expect(result.note).toMatch(/not a diagnosis/i);
   });
 

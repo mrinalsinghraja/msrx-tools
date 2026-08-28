@@ -1,4 +1,6 @@
-import type { ToolSpec } from "../types";
+import { QUANTITIES, unitChoices } from "@/lib/units";
+
+import type { OptionSpec, ToolSpec } from "../types";
 
 /**
  * Calculators & generators. Pure arithmetic — no engine warm-up, no network.
@@ -18,23 +20,35 @@ export const CALC_TOOLS: ToolSpec[] = [
         kind: "select",
         id: "quantity",
         label: "Measuring",
-        choices: [
-          { value: "length", label: "Length" },
-          { value: "mass", label: "Mass" },
-          { value: "area", label: "Area" },
-          { value: "volume", label: "Volume" },
-          { value: "speed", label: "Speed" },
-          { value: "temperature", label: "Temperature" },
-          { value: "data", label: "Digital storage" },
-          { value: "time", label: "Time" },
-          { value: "pressure", label: "Pressure" },
-          { value: "energy", label: "Energy" },
-        ],
+        choices: QUANTITIES.map((q) => ({ value: q.id, label: q.label })),
         default: "length",
       },
       { kind: "number", id: "value", label: "Value", default: 1, step: 0.0001 },
-      { kind: "text", id: "from", label: "From unit", default: "m" },
-      { kind: "text", id: "to", label: "To unit", default: "ft" },
+      /*
+        One pair of unit pickers per quantity, shown only for the quantity it
+        belongs to. These were free text defaulting to "m" and "ft", so picking
+        Mass — or anything but Length — produced an error until you also guessed
+        a valid unit for it. The choices come from the same table the converter
+        uses, so the picker can never offer a unit the converter would reject.
+      */
+      ...QUANTITIES.flatMap((q): OptionSpec[] => [
+        {
+          kind: "select",
+          id: `from_${q.id}`,
+          label: "From",
+          choices: unitChoices(q.id),
+          default: q.from,
+          showIf: { id: "quantity", equals: q.id },
+        },
+        {
+          kind: "select",
+          id: `to_${q.id}`,
+          label: "To",
+          choices: unitChoices(q.id),
+          default: q.to,
+          showIf: { id: "quantity", equals: q.id },
+        },
+      ]),
       { kind: "number", id: "precision", label: "Decimal places", default: 6, min: 0, max: 12, step: 1 },
     ],
     related: ["base-converter", "aspect-ratio-calculator", "percentage-calculator"],
@@ -230,12 +244,22 @@ export const CALC_TOOLS: ToolSpec[] = [
         label: "Units",
         choices: [
           { value: "metric", label: "Metric — cm and kg" },
-          { value: "imperial", label: "Imperial — inches and pounds" },
+          { value: "imperial", label: "Imperial — feet, inches and pounds" },
         ],
         default: "metric",
       },
-      { kind: "number", id: "height", label: "Height", default: 170, min: 1, step: 0.5 },
-      { kind: "number", id: "weight", label: "Weight", default: 70, min: 1, step: 0.1 },
+      /*
+        A field per system rather than one pair reused. Sharing them meant the
+        units changed but the numbers and the labels did not, so switching to
+        imperial silently read 170 cm as 170 inches and returned a BMI of 1.7.
+        Each field now carries its own unit in the label and its own sensible
+        default, and the pair for the other system is not on screen at all.
+      */
+      { kind: "number", id: "heightCm", label: "Height (cm)", default: 170, min: 1, step: 0.5, showIf: { id: "system", equals: "metric" } },
+      { kind: "number", id: "weightKg", label: "Weight (kg)", default: 70, min: 1, step: 0.1, showIf: { id: "system", equals: "metric" } },
+      { kind: "number", id: "heightFt", label: "Height (feet)", default: 5, min: 0, max: 8, step: 1, showIf: { id: "system", equals: "imperial" } },
+      { kind: "number", id: "heightIn", label: "and inches", default: 7, min: 0, max: 11, step: 0.5, showIf: { id: "system", equals: "imperial" } },
+      { kind: "number", id: "weightLb", label: "Weight (pounds)", default: 154, min: 1, step: 0.5, showIf: { id: "system", equals: "imperial" } },
     ],
     related: ["unit-converter", "age-calculator"],
     icon: "Activity",
@@ -314,7 +338,7 @@ export const CALC_TOOLS: ToolSpec[] = [
       { kind: "number", id: "from", label: "Input base", default: 10, min: 2, max: 36, step: 1 },
       { kind: "toggle", id: "common", label: "Show binary, octal, decimal and hex", default: true },
       { kind: "number", id: "to", label: "Also convert to base", default: 2, min: 2, max: 36, step: 1 },
-      { kind: "toggle", id: "group", label: "Group binary in fours", default: true },
+      { kind: "toggle", id: "group", label: "Group digits for readability", default: true },
     ],
     related: ["unit-converter", "roman-numeral-converter", "hash-generator"],
     icon: "Binary",
