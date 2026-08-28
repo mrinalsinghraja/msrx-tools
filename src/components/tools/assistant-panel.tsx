@@ -90,15 +90,15 @@ export function AssistantPanel({
   return (
     <section className="plate mt-12 rounded-lg p-5 sm:p-6">
       <div className="flex items-center gap-2">
-        <span className="flex size-7 items-center justify-center rounded-md bg-accent-wash text-accent-ink">
+        <span className="flex size-7 items-center justify-center rounded-md bg-pen-wash text-pen-new">
           <Sparkles className="size-4" aria-hidden />
         </span>
-        <h2 className="font-display text-base font-semibold tracking-tight text-ink">
+        <h2 className="stamp text-base font-semibold text-graphite">
           Ask about {toolTitle}
         </h2>
       </div>
 
-      <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
+      <p className="mt-2 text-[13px] leading-relaxed text-graphite-soft">
         Questions about what this tool does, which option to pick, or what it can and cannot handle.
       </p>
 
@@ -112,7 +112,7 @@ export function AssistantPanel({
               setQuestion("");
               void ask(preset);
             }}
-            className="rounded-full border border-line bg-surface px-3 py-1.5 text-[13px] text-ink-soft transition-colors hover:border-line-strong hover:text-ink disabled:opacity-50"
+            className="rounded-full border border-construction bg-sheet px-3 py-1.5 text-[13px] text-graphite-soft transition-colors hover:border-construction-strong hover:text-graphite disabled:opacity-50"
           >
             {preset}
           </button>
@@ -133,7 +133,7 @@ export function AssistantPanel({
           maxLength={MAX_QUESTION_LENGTH}
           placeholder="Ask your own question…"
           aria-label={`Ask a question about ${toolTitle}`}
-          className="h-10 w-full rounded-md border border-line bg-surface px-3 text-sm text-ink placeholder:text-ink-faint transition-colors hover:border-line-strong"
+          className="h-10 w-full rounded-md border border-construction bg-sheet px-3 text-sm text-graphite placeholder:text-graphite-faint transition-colors hover:border-construction-strong"
         />
         {busy ? (
           <Button type="button" variant="secondary" onClick={stop} aria-label="Stop the answer">
@@ -148,8 +148,8 @@ export function AssistantPanel({
       </form>
 
       {asked ? (
-        <div className="mt-5 border-t border-line pt-5">
-          <p className="text-[13px] font-medium text-ink">{asked}</p>
+        <div className="mt-5 border-t border-construction pt-5">
+          <p className="text-[13px] font-medium text-graphite">{asked}</p>
 
           {error ? (
             <div className="mt-3">
@@ -157,23 +157,23 @@ export function AssistantPanel({
             </div>
           ) : (
             <div
-              className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-ink-soft"
+              className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-graphite-soft"
               aria-live="polite"
               aria-busy={busy}
             >
               {stripMarkdown(answer)}
-              {busy && !answer ? <span className="text-ink-faint">Thinking…</span> : null}
+              {busy && !answer ? <span className="text-graphite-faint">Thinking…</span> : null}
               {busy && answer ? (
-                <span className={cn("ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 bg-accent")} />
+                <span className={cn("ml-0.5 inline-block h-4 w-1.5 translate-y-0.5 bg-pen-fill")} />
               ) : null}
             </div>
           )}
         </div>
       ) : null}
 
-      <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-faint">
+      <p className="mt-5 border-t border-construction pt-4 text-xs leading-relaxed text-graphite-faint">
         This is the one part of the site that uses a server. The question you type here is sent to
-        an AI provider to be answered — <strong className="font-medium text-ink-soft">your files
+        an AI provider to be answered — <strong className="font-medium text-graphite-soft">your files
         and whatever you put in the tool above are not</strong>, and the assistant cannot see them.
         Answers are generated and can be wrong; the tool itself is not guessing.
       </p>

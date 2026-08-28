@@ -71,10 +71,10 @@ function OptionControl({
       return (
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
-            <label htmlFor={controlId} className="text-[13px] font-medium text-ink">
+            <label htmlFor={controlId} className="text-[13px] font-medium text-graphite">
               {option.label}
             </label>
-            <span className="font-mono text-[13px] text-ink-soft tabular-nums">
+            <span className="font-mono text-[13px] text-graphite-soft tabular-nums">
               {Number(value)}
               {option.unit ?? ""}
             </span>
@@ -87,7 +87,7 @@ function OptionControl({
             step={option.step}
             onValueChange={(next) => onChange(option.id, next)}
           />
-          {option.help ? <p className="text-xs leading-snug text-ink-faint">{option.help}</p> : null}
+          {option.help ? <p className="text-xs leading-snug text-graphite-faint">{option.help}</p> : null}
         </div>
       );
 
@@ -118,7 +118,7 @@ function OptionControl({
               type="color"
               value={String(value)}
               onChange={(event) => onChange(option.id, event.target.value)}
-              className="size-9 cursor-pointer rounded-md border border-line bg-surface p-1"
+              className="size-9 cursor-pointer rounded-md border border-construction bg-sheet p-1"
             />
             <Input
               aria-label={`${option.label} hex value`}

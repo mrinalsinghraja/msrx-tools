@@ -135,14 +135,14 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
           }}
           className={cn(
             "well flex flex-col items-center justify-center rounded-lg px-6 py-12 text-center transition-colors",
-            dragging && "border-accent-deep bg-accent-wash",
+            dragging && "border-pen-new bg-pen-wash",
           )}
         >
-          <Upload className="size-7 text-ink-faint" aria-hidden />
-          <p className="mt-3 font-display text-base font-semibold text-ink">
+          <Upload className="size-7 text-graphite-faint" aria-hidden />
+          <p className="mt-3 font-display text-base font-semibold text-graphite">
             {multiple ? "Drop your files here" : "Drop your file here"}
           </p>
-          <p className="mt-1 text-[13px] text-ink-soft">
+          <p className="mt-1 text-[13px] text-graphite-soft">
             {accepts?.ext.map((extension) => `.${extension}`).join(", ")} · they stay on this device
           </p>
           <Button variant="primary" className="mt-4" onClick={() => inputRef.current?.click()}>
@@ -164,7 +164,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
         {files.length > 0 ? (
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+              <h2 className="annot">
                 {files.length} file{files.length === 1 ? "" : "s"} · {formatBytes(totalSize)}
               </h2>
               <Button size="sm" variant="ghost" onClick={() => { setFiles([]); setResult(null); }}>
@@ -175,10 +175,10 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
             <ul className="flex flex-col gap-2">
               {files.map((file, index) => (
                 <li key={file.id} className="plate flex items-center gap-3 rounded-md px-3 py-2">
-                  <FileIcon className="size-4 shrink-0 text-ink-faint" aria-hidden />
+                  <FileIcon className="size-4 shrink-0 text-graphite-faint" aria-hidden />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-ink">{file.name}</span>
-                    <span className="block text-xs text-ink-faint">{formatBytes(file.size)}</span>
+                    <span className="block truncate text-sm text-graphite">{file.name}</span>
+                    <span className="block text-xs text-graphite-faint">{formatBytes(file.size)}</span>
                   </span>
                   {multiple && files.length > 1 ? (
                     <>
@@ -188,7 +188,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
                         onClick={() => move(index, -1)}
                         disabled={index === 0}
                         aria-label={`Move ${file.name} up`}
-                        className="rounded p-1 text-ink-faint transition-colors hover:text-ink disabled:opacity-30"
+                        className="rounded p-1 text-graphite-faint transition-colors hover:text-graphite disabled:opacity-30"
                       >
                         <ArrowUp className="size-4" aria-hidden />
                       </button>
@@ -196,7 +196,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
                         onClick={() => move(index, 1)}
                         disabled={index === files.length - 1}
                         aria-label={`Move ${file.name} down`}
-                        className="rounded p-1 text-ink-faint transition-colors hover:text-ink disabled:opacity-30"
+                        className="rounded p-1 text-graphite-faint transition-colors hover:text-graphite disabled:opacity-30"
                       >
                         <ArrowDown className="size-4" aria-hidden />
                       </button>
@@ -205,7 +205,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
                   <button
                     onClick={() => remove(file.id)}
                     aria-label={`Remove ${file.name}`}
-                    className="rounded p-1 text-ink-faint transition-colors hover:text-danger"
+                    className="rounded p-1 text-graphite-faint transition-colors hover:text-pen-rev"
                   >
                     <Trash2 className="size-4" aria-hidden />
                   </button>
@@ -226,15 +226,15 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
 
             {busy && progress ? (
               <div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-sunk ring-1 ring-inset ring-line">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-sunk ring-1 ring-inset ring-construction">
                   <div
-                    className="h-full bg-accent transition-[width] duration-150"
+                    className="h-full bg-pen-fill transition-[width] duration-150"
                     // A sliver at zero so the bar reads as "started", not "stuck".
                     style={{ width: `${Math.max(3, Math.round(progress.fraction * 100))}%` }}
                   />
                 </div>
                 {progress.label ? (
-                  <p className="mt-2 text-xs text-ink-faint">{progress.label}</p>
+                  <p className="mt-2 text-xs text-graphite-faint">{progress.label}</p>
                 ) : null}
               </div>
             ) : null}
@@ -248,7 +248,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
 
       <aside className="lg:sticky lg:top-6 lg:self-start">
         <div className="plate rounded-lg p-5">
-          <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+          <h2 className="mb-4 font-display text-sm font-semibold uppercase tracking-[0.1em] text-graphite-soft">
             Options
           </h2>
           {tool.options.length ? (
@@ -261,9 +261,9 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
               }}
             />
           ) : (
-            <p className="text-[13px] text-ink-faint">This tool has nothing to configure.</p>
+            <p className="text-[13px] text-graphite-faint">This tool has nothing to configure.</p>
           )}
-          <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-faint">
+          <p className="mt-5 border-t border-construction pt-4 text-xs leading-relaxed text-graphite-faint">
             Your files are read by this tab and never uploaded. Closing the page discards them.
           </p>
         </div>
@@ -302,7 +302,7 @@ function ResultFiles({ result }: { result: FileOpResult }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+        <h2 className="annot">
           Result
         </h2>
         {result.files.length > 1 ? (
@@ -314,7 +314,7 @@ function ResultFiles({ result }: { result: FileOpResult }) {
       </div>
 
       {result.stats?.length ? (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-line bg-surface px-4 py-3 sm:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-construction bg-sheet px-4 py-3 sm:grid-cols-3">
           {result.stats.map((stat) => (
             <Stat key={stat.label} label={stat.label} value={stat.value} />
           ))}
@@ -324,10 +324,10 @@ function ResultFiles({ result }: { result: FileOpResult }) {
       <ul className="flex flex-col gap-2">
         {result.files.map((file) => (
           <li key={file.name} className="plate flex items-center gap-3 rounded-md px-3 py-2">
-            <FileIcon className="size-4 shrink-0 text-accent-ink" aria-hidden />
+            <FileIcon className="size-4 shrink-0 text-pen-new" aria-hidden />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm text-ink">{file.name}</span>
-              <span className="block text-xs text-ink-faint">{formatBytes(file.bytes.length)}</span>
+              <span className="block truncate text-sm text-graphite">{file.name}</span>
+              <span className="block text-xs text-graphite-faint">{formatBytes(file.bytes.length)}</span>
             </span>
             <Button size="sm" variant="secondary" onClick={() => download(file)}>
               <Download className="size-3.5" aria-hidden />

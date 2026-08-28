@@ -39,7 +39,7 @@ export function ResultPanel({
   return (
     <section className="flex min-h-0 flex-col gap-3" aria-live="polite">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+        <h2 className="annot">
           Result
         </h2>
         {result && result.output ? <ResultActions tool={tool} result={result} /> : null}
@@ -48,7 +48,7 @@ export function ResultPanel({
       {error ? <Notice tone="error">{error}</Notice> : null}
 
       {result?.stats?.length ? (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-line bg-surface px-4 py-3 sm:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md border border-construction bg-sheet px-4 py-3 sm:grid-cols-3">
           {result.stats.map((stat) => (
             <Stat key={stat.label} label={stat.label} value={stat.value} />
           ))}
@@ -61,11 +61,11 @@ export function ResultPanel({
         data-busy={busy ? "true" : undefined}
       >
         {result?.output ? (
-          <pre className="whitespace-pre-wrap break-words font-mono text-[13px] leading-relaxed text-ink">
+          <pre className="whitespace-pre-wrap break-words font-mono text-[13px] leading-relaxed text-graphite">
             {result.output}
           </pre>
         ) : (
-          <p className="text-sm text-ink-faint">
+          <p className="text-sm text-graphite-faint">
             {error ? "Fix the input above and the result appears here." : "The result appears here as you type."}
           </p>
         )}

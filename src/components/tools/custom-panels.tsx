@@ -33,7 +33,7 @@ function DiffView({ payload }: { payload?: DiffPayload }) {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+      <h2 className="annot">
         Differences
       </h2>
       <div className="well overflow-auto rounded-lg p-1">
@@ -44,8 +44,8 @@ function DiffView({ payload }: { payload?: DiffPayload }) {
               className={cn(
                 "block whitespace-pre-wrap break-words px-3 py-px",
                 change.added && "bg-good-wash text-good",
-                change.removed && "bg-danger-wash text-danger line-through decoration-danger/40",
-                !change.added && !change.removed && "text-ink-soft",
+                change.removed && "bg-pen-rev-wash text-pen-rev line-through decoration-pen-rev/40",
+                !change.added && !change.removed && "text-graphite-soft",
               )}
             >
               {change.value.replace(/\n$/, "") || " "}
@@ -102,7 +102,7 @@ function QrView({ extra }: { extra?: { svg?: string } }) {
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+      <h2 className="annot">
         Preview
       </h2>
       <div className="well flex flex-col items-center gap-4 rounded-lg p-6">
@@ -115,13 +115,13 @@ function QrView({ extra }: { extra?: { svg?: string } }) {
         <div className="flex gap-2">
           <button
             onClick={downloadPng}
-            className="h-8 rounded-md bg-accent-deep px-3 text-[13px] font-medium text-white transition-colors hover:bg-accent-ink"
+            className="h-8 rounded-md bg-pen-new px-3 text-[13px] font-medium text-on-pen transition-colors hover:bg-pen-deep"
           >
             Download PNG
           </button>
           <button
             onClick={downloadSvg}
-            className="h-8 rounded-md border border-line bg-surface px-3 text-[13px] font-medium text-ink transition-colors hover:border-line-strong"
+            className="h-8 rounded-md border border-construction bg-sheet px-3 text-[13px] font-medium text-graphite transition-colors hover:border-construction-strong"
           >
             Download SVG
           </button>
@@ -135,12 +135,12 @@ function SwatchView({ extra }: { extra?: { hex?: string } }) {
   if (!extra?.hex) return null;
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+      <h2 className="annot">
         Swatch
       </h2>
       <div className="grid grid-cols-2 gap-3">
         <div
-          className="flex h-24 items-end rounded-lg border border-line p-3"
+          className="flex h-24 items-end rounded-lg border border-construction p-3"
           style={{ backgroundColor: extra.hex }}
         >
           <span className="rounded bg-white/85 px-2 py-0.5 font-mono text-xs text-[#17191d]">
@@ -148,7 +148,7 @@ function SwatchView({ extra }: { extra?: { hex?: string } }) {
           </span>
         </div>
         <div
-          className="flex h-24 items-end rounded-lg border border-line p-3"
+          className="flex h-24 items-end rounded-lg border border-construction p-3"
           style={{ backgroundColor: extra.hex }}
         >
           <span className="rounded bg-black/80 px-2 py-0.5 font-mono text-xs text-white">on black</span>
@@ -164,13 +164,13 @@ function CssPreview({ slug, extra }: { slug: string; extra?: { css?: string } })
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+      <h2 className="annot">
         Preview
       </h2>
       <div className="well flex items-center justify-center rounded-lg p-8">
         <div
-          className="h-32 w-full max-w-sm rounded-xl border border-line"
-          style={isGradient ? { background: extra.css } : { boxShadow: extra.css, background: "var(--color-surface)" }}
+          className="h-32 w-full max-w-sm rounded-xl border border-construction"
+          style={isGradient ? { background: extra.css } : { boxShadow: extra.css, background: "var(--color-sheet)" }}
         />
       </div>
     </section>

@@ -109,7 +109,7 @@ function Workspace({ tool }: { tool: ToolSpec }) {
         {tool.io !== "form" ? (
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+              <h2 className="annot">
                 {isDiff ? "Original" : "Input"}
               </h2>
               <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ function Workspace({ tool }: { tool: ToolSpec }) {
 
             {isDiff ? (
               <>
-                <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+                <h2 className="annot">
                   Changed
                 </h2>
                 <Textarea
@@ -173,7 +173,7 @@ function Workspace({ tool }: { tool: ToolSpec }) {
       <aside className="lg:sticky lg:top-6 lg:self-start">
         <div className="plate rounded-lg p-5">
           <div className="mb-4 flex items-center justify-between gap-2">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+            <h2 className="annot">
               Options
             </h2>
             {tool.io === "form" ? (
@@ -187,10 +187,10 @@ function Workspace({ tool }: { tool: ToolSpec }) {
           {tool.options.length ? (
             <OptionsPanel options={tool.options} values={options} onChange={setOption} />
           ) : (
-            <p className="text-[13px] text-ink-faint">This tool has nothing to configure.</p>
+            <p className="text-[13px] text-graphite-faint">This tool has nothing to configure.</p>
           )}
 
-          <p className="mt-5 border-t border-line pt-4 text-xs leading-relaxed text-ink-faint">
+          <p className="mt-5 border-t border-construction pt-4 text-xs leading-relaxed text-graphite-faint">
             Everything runs inside this tab. Nothing you type or paste is uploaded.
           </p>
         </div>

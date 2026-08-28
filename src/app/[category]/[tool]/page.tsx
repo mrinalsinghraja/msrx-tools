@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ToolDiagram } from "@/components/diagram/tool-diagram";
 import { AssistantPanel } from "@/components/tools/assistant-panel";
 import { ToolCard } from "@/components/tools/tool-card";
 import { ToolRunner } from "@/components/tools/tool-runner";
@@ -60,31 +61,36 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="flex flex-wrap items-center gap-1 text-[13px] text-ink-faint">
+        <ol className="flex flex-wrap items-center gap-1 text-[13px] text-graphite-faint">
           <li>
-            <Link href="/" className="hover:text-ink">
+            <Link href="/" className="hover:text-graphite">
               Tools
             </Link>
           </li>
           <ChevronRight className="size-3.5" aria-hidden />
           <li>
-            <Link href={`/${category.slug}`} className="hover:text-ink">
+            <Link href={`/${category.slug}`} className="hover:text-graphite">
               {category.title}
             </Link>
           </li>
           <ChevronRight className="size-3.5" aria-hidden />
-          <li aria-current="page" className="text-ink">
+          <li aria-current="page" className="text-graphite">
             {tool.title}
           </li>
         </ol>
       </nav>
 
-      <header className="mb-8 max-w-2xl">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-          {tool.title}
-        </h1>
-        <p className="mt-3 text-base leading-relaxed text-ink-soft">{tool.short}.</p>
-        <p className="mt-2 text-[13px] text-accent-ink">{PRIVACY_LINE}</p>
+      <header className="mb-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
+        <div className="max-w-2xl">
+          <h1 className="stamp text-3xl font-semibold text-graphite sm:text-4xl">{tool.title}</h1>
+          <div className="section-rule mt-4 max-w-xs" />
+          <p className="mt-5 text-base leading-relaxed text-graphite-soft">{tool.short}.</p>
+          <p className="annot mt-3 text-pen-new">{PRIVACY_LINE}</p>
+        </div>
+
+        {/* The operation, drawn. Which drawing appears is derived from the
+            registry, so it can never contradict what the tool does. */}
+        <ToolDiagram tool={tool} />
       </header>
 
       <ToolRunner slug={tool.slug} />
@@ -94,24 +100,24 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
       {content ? (
         <div className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="max-w-2xl">
-            <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+            <h2 className="stamp-wide text-lg font-semibold text-graphite">
               About the {tool.title}
             </h2>
-            <div className="bench-rule mt-3 rounded-full" />
+            <div className="section-rule mt-3 rounded-full" />
             {content.intro.split("\n\n").map((paragraph, index) => (
-              <p key={index} className="mt-4 text-[15px] leading-relaxed text-ink-soft">
+              <p key={index} className="mt-4 text-[15px] leading-relaxed text-graphite-soft">
                 {paragraph}
               </p>
             ))}
 
-            <h2 className="mt-10 font-display text-xl font-semibold tracking-tight text-ink">
+            <h2 className="mt-10 stamp-wide text-lg font-semibold text-graphite">
               How to use it
             </h2>
-            <div className="bench-rule mt-3 rounded-full" />
+            <div className="section-rule mt-3 rounded-full" />
             <ol className="mt-4 flex flex-col gap-3">
               {content.steps.map((step, index) => (
-                <li key={index} className="flex gap-3 text-[15px] leading-relaxed text-ink-soft">
-                  <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash font-mono text-xs font-medium text-accent-ink">
+                <li key={index} className="flex gap-3 text-[15px] leading-relaxed text-graphite-soft">
+                  <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-pen-wash font-mono text-xs font-medium text-pen-new">
                     {index + 1}
                   </span>
                   {step}
@@ -119,15 +125,15 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
               ))}
             </ol>
 
-            <h2 className="mt-10 font-display text-xl font-semibold tracking-tight text-ink">
+            <h2 className="mt-10 stamp-wide text-lg font-semibold text-graphite">
               Questions
             </h2>
-            <div className="bench-rule mt-3 rounded-full" />
-            <dl className="mt-4 flex flex-col divide-y divide-line border-y border-line">
+            <div className="section-rule mt-3 rounded-full" />
+            <dl className="mt-4 flex flex-col divide-y divide-construction border-y border-construction">
               {content.faq.map((entry) => (
                 <div key={entry.q} className="py-4">
-                  <dt className="font-display text-[15px] font-semibold text-ink">{entry.q}</dt>
-                  <dd className="mt-2 text-[15px] leading-relaxed text-ink-soft">{entry.a}</dd>
+                  <dt className="stamp text-[15px] font-semibold text-graphite">{entry.q}</dt>
+                  <dd className="mt-2 text-[15px] leading-relaxed text-graphite-soft">{entry.a}</dd>
                 </div>
               ))}
             </dl>
@@ -152,7 +158,7 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
 function RelatedRail({ tools }: { tools: ToolSpec[] }) {
   return (
     <aside>
-      <h2 className="font-display text-sm font-semibold uppercase tracking-[0.1em] text-ink-soft">
+      <h2 className="annot">
         Related tools
       </h2>
       <div className="mt-4 flex flex-col gap-3">

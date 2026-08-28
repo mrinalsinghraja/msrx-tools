@@ -11,7 +11,7 @@ export function SiteHeader() {
   const populated = CATEGORIES.filter((category) => toolsInCategory(category.id).length > 0);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bench/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b-2 border-graphite bg-film/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-2 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center" aria-label={`${SITE.name} home`}>
           {/*
@@ -24,7 +24,7 @@ export function SiteHeader() {
             ground deliberate instead, and works in dark mode too. The image
             itself is untouched.
           */}
-          <span className="plate flex items-center overflow-hidden rounded-xl px-2">
+          <span className="flex items-center overflow-hidden border border-construction bg-sheet px-2">
             <Image
               src={logo}
               alt={SITE.name}
@@ -40,16 +40,26 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <nav aria-label="Tool categories" className="border-t border-line/70">
+      {/*
+        The category strip is the grid line. Each category carries its reference
+        letter, the way a column grid on a structural plan does — so the letter
+        in the footer's sheet index and the letter here mean the same thing.
+      */}
+      <nav aria-label="Tool categories" className="border-t border-construction">
         <div className="mx-auto max-w-6xl overflow-x-auto px-4 sm:px-6">
-          <ul className="flex items-center gap-1 py-1.5">
-            {populated.map((category) => (
-              <li key={category.id}>
+          <ul className="flex items-stretch">
+            {populated.map((category, index) => (
+              <li key={category.id} className="border-r border-construction first:border-l">
                 <Link
                   href={`/${category.slug}`}
-                  className="block whitespace-nowrap rounded px-2.5 py-1 text-[13px] font-medium text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+                  className="group flex items-center gap-2 whitespace-nowrap px-3 py-2 transition-colors hover:bg-sheet"
                 >
-                  {category.title}
+                  <span className="font-mono text-[10px] text-graphite-faint group-hover:text-pen-new">
+                    {String.fromCharCode(65 + index)}
+                  </span>
+                  <span className="text-[13px] font-medium text-graphite-soft group-hover:text-graphite">
+                    {category.title}
+                  </span>
                 </Link>
               </li>
             ))}

@@ -39,21 +39,21 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <nav aria-label="Breadcrumb" className="mb-6 text-[13px] text-ink-faint">
-        <Link href="/" className="hover:text-ink">
+      <nav aria-label="Breadcrumb" className="mb-6 text-[13px] text-graphite-faint">
+        <Link href="/" className="hover:text-graphite">
           Tools
         </Link>
         <span className="px-2">/</span>
-        <span className="text-ink">{category.title}</span>
+        <span className="text-graphite">{category.title}</span>
       </nav>
 
       <header className="max-w-2xl">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-graphite sm:text-4xl">
           {category.title} tools
         </h1>
-        <div className="bench-rule mt-4 rounded-full" />
-        <p className="mt-5 text-base leading-relaxed text-ink-soft">{category.blurb}</p>
-        <p className="mt-3 font-mono text-xs uppercase tracking-[0.14em] text-accent-ink">
+        <div className="section-rule mt-4 rounded-full" />
+        <p className="mt-5 text-base leading-relaxed text-graphite-soft">{category.blurb}</p>
+        <p className="mt-3 font-mono text-xs uppercase tracking-[0.14em] text-pen-new">
           {tools.length} tools · free · nothing uploaded
         </p>
       </header>
@@ -64,8 +64,8 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
         ))}
       </div>
 
-      <section className="mt-16 border-t border-line pt-10">
-        <h2 className="font-display text-lg font-semibold tracking-tight text-ink">
+      <section className="mt-16 border-t border-construction pt-10">
+        <h2 className="font-display text-lg font-semibold tracking-tight text-graphite">
           Other categories
         </h2>
         <ul className="mt-4 flex flex-wrap gap-2">
@@ -74,10 +74,10 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
               <li key={other.id}>
                 <Link
                   href={`/${other.slug}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-1.5 text-[13px] font-medium text-ink transition-colors hover:border-line-strong"
+                  className="inline-flex items-center gap-2 rounded-md border border-construction bg-sheet px-3 py-1.5 text-[13px] font-medium text-graphite transition-colors hover:border-construction-strong"
                 >
                   {other.title}
-                  <span className="text-ink-faint">{toolsInCategory(other.id).length}</span>
+                  <span className="text-graphite-faint">{toolsInCategory(other.id).length}</span>
                 </Link>
               </li>
             ),

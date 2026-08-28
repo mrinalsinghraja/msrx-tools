@@ -72,7 +72,7 @@ export function ToolSearch() {
   return (
     <div ref={containerRef} className="relative w-full max-w-xs">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-ink-faint" aria-hidden />
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-graphite-faint" aria-hidden />
         <input
           ref={inputRef}
           type="search"
@@ -88,7 +88,7 @@ export function ToolSearch() {
           onFocus={() => setOpen(true)}
           onKeyDown={onKeyDown}
           placeholder="Search tools…"
-          className="h-9 w-full rounded-md border border-line bg-surface pl-8 pr-3 text-sm text-ink placeholder:text-ink-faint transition-colors hover:border-line-strong [&::-webkit-search-cancel-button]:appearance-none"
+          className="h-9 w-full rounded-md border border-construction bg-sheet pl-8 pr-3 text-sm text-graphite placeholder:text-graphite-faint transition-colors hover:border-construction-strong [&::-webkit-search-cancel-button]:appearance-none"
         />
       </div>
 
@@ -96,7 +96,7 @@ export function ToolSearch() {
         <div
           id={listId}
           role="listbox"
-          className="absolute right-0 top-full z-50 mt-2 w-80 max-w-[85vw] overflow-hidden rounded-lg border border-line bg-surface shadow-float"
+          className="absolute right-0 top-full z-50 mt-2 w-80 max-w-[85vw] overflow-hidden rounded-lg border border-construction bg-sheet shadow-float"
         >
           {results.length ? (
             <ul className="max-h-80 overflow-y-auto p-1">
@@ -113,17 +113,17 @@ export function ToolSearch() {
                     onMouseEnter={() => setActive(index)}
                     className={cn(
                       "block rounded px-2.5 py-2 transition-colors",
-                      index === active ? "bg-surface-sunk" : "hover:bg-surface-sunk",
+                      index === active ? "bg-sunk" : "hover:bg-sunk",
                     )}
                   >
-                    <span className="block text-sm font-medium text-ink">{tool.title}</span>
-                    <span className="mt-0.5 block truncate text-xs text-ink-faint">{tool.short}</span>
+                    <span className="block text-sm font-medium text-graphite">{tool.title}</span>
+                    <span className="mt-0.5 block truncate text-xs text-graphite-faint">{tool.short}</span>
                   </Link>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="px-3 py-4 text-sm text-ink-faint">
+            <p className="px-3 py-4 text-sm text-graphite-faint">
               Nothing matches “{query.trim()}” yet.
             </p>
           )}
