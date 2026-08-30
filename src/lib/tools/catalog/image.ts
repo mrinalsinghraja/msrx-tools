@@ -88,6 +88,14 @@ export const IMAGE_TOOLS: ToolSpec[] = [
         showIf: { id: "mode", equals: "size" },
       },
       {
+        kind: "toggle",
+        id: "allowResize",
+        label: "Resize to reach the target",
+        default: true,
+        help: "A large photograph cannot reach a small target on quality alone. Leave this on and the image is made smaller until it fits; turn it off to keep the original dimensions and accept a bigger file.",
+        showIf: { id: "mode", equals: "size" },
+      },
+      {
         kind: "number",
         id: "maxWidth",
         label: "Also limit width to",

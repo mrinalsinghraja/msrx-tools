@@ -5,7 +5,9 @@ import {
   computeResize,
   coverRect,
   FAVICON_SIZES,
+  MIN_TARGET_WIDTH,
   normaliseCrop,
+  planShrink,
   searchQualityForSize,
 } from "@/lib/engines/image/geometry";
 
@@ -169,5 +171,56 @@ describe("favicon sizes", () => {
 
   it("is sorted ascending", () => {
     expect([...FAVICON_SIZES].sort((a, b) => a - b)).toEqual(FAVICON_SIZES);
+  });
+});
+
+describe("planShrink", () => {
+  // The bug this exists for: a 4536x8064 phone photo asked to fit in 100 KB came
+  // back at 474 KB, because quality was the only lever being pulled.
+  const PHONE = { width: 4536, height: 8064 };
+  const TARGET = 100 * 1024;
+
+  it("stops once the encoding already fits", () => {
+    expect(planShrink(PHONE, TARGET - 1, TARGET)).toBeNull();
+  });
+
+  it("keeps the aspect ratio", () => {
+    const next = planShrink(PHONE, 474 * 1024, TARGET);
+    expect(next).not.toBeNull();
+    expect(next!.width / next!.height).toBeCloseTo(PHONE.width / PHONE.height, 3);
+  });
+
+  it("always makes real progress, so a pass is never wasted", () => {
+    // A near miss would otherwise plan a scale of ~0.99 and re-encode for nothing.
+    const next = planShrink(PHONE, TARGET + 1, TARGET);
+    expect(next!.width).toBeLessThanOrEqual(Math.floor(PHONE.width * 0.85));
+  });
+
+  it("converges on the target within the passes the op allows", () => {
+    // Bytes track pixel count at a fixed quality, which is the assumption the
+    // planner is built on; model that and count how many passes it takes.
+    const bytesFor = (size: { width: number; height: number }) =>
+      (size.width * size.height) / (PHONE.width * PHONE.height) * 474 * 1024;
+
+    let size = PHONE;
+    let passes = 0;
+    while (bytesFor(size) > TARGET) {
+      const next = planShrink(size, bytesFor(size), TARGET);
+      expect(next).not.toBeNull();
+      size = next!;
+      passes++;
+    }
+    expect(passes).toBeLessThanOrEqual(5); // MAX_SHRINK_PASSES in ops.ts
+    expect(size.width).toBeLessThan(PHONE.width);
+  });
+
+  it("refuses to shrink past the point the picture is still the picture", () => {
+    const tiny = { width: MIN_TARGET_WIDTH, height: 100 };
+    expect(planShrink(tiny, 10_000_000, 1024)).toBeNull();
+  });
+
+  it("clamps to the floor rather than stepping below it", () => {
+    const next = planShrink({ width: 100, height: 100 }, 10_000_000, 1024);
+    expect(next).toEqual({ width: MIN_TARGET_WIDTH, height: MIN_TARGET_WIDTH });
   });
 });

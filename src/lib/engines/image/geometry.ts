@@ -123,12 +123,18 @@ export function normaliseCrop(
  * bytes is monotonic but wildly non-linear and differs per image — there is no
  * formula, only measurement. `encode` does the measuring.
  */
+/**
+ * The lowest quality the size search will accept. Below this a photograph is
+ * visibly broken, and shrinking its dimensions is the better trade every time.
+ */
+export const MIN_SEARCH_QUALITY = 0.2;
+
 export async function searchQualityForSize(
   targetBytes: number,
   encode: (quality: number) => Promise<number>,
   options: { minQuality?: number; maxQuality?: number; steps?: number } = {},
 ): Promise<{ quality: number; bytes: number; hitTarget: boolean }> {
-  const { minQuality = 0.2, maxQuality = 0.95, steps = 7 } = options;
+  const { minQuality = MIN_SEARCH_QUALITY, maxQuality = 0.95, steps = 7 } = options;
 
   let low = minQuality;
   let high = maxQuality;
@@ -161,3 +167,34 @@ export async function searchQualityForSize(
 
 /** Sizes a favicon set covers. Chosen to match what browsers and manifests ask for. */
 export const FAVICON_SIZES = [16, 32, 48, 64, 128, 180, 192, 256, 512];
+
+/**
+ * Smallest width we will shrink an image to while chasing a target file size.
+ * Below this the picture has stopped being the thing the user uploaded.
+ */
+export const MIN_TARGET_WIDTH = 96;
+
+/**
+ * The next size to try when quality alone could not reach a target file size.
+ *
+ * Encoded bytes track pixel count closely at a fixed quality, so the square
+ * root of the overshoot is a good first guess at the scale factor. It is
+ * deliberately pessimistic and always makes real progress: a pass that came
+ * back at nearly the same size would spend a full re-encode for nothing.
+ *
+ * Returns null when there is nothing useful left to try.
+ */
+export function planShrink(
+  size: Size,
+  bytes: number,
+  targetBytes: number,
+  minWidth: number = MIN_TARGET_WIDTH,
+): Size | null {
+  if (bytes <= targetBytes || size.width <= minWidth) return null;
+
+  const guess = Math.sqrt(targetBytes / bytes) * 0.9;
+  const width = Math.max(minWidth, Math.floor(size.width * Math.min(guess, 0.85)));
+  if (width >= size.width) return null;
+
+  return { width, height: Math.max(1, Math.round((width / size.width) * size.height)) };
+}

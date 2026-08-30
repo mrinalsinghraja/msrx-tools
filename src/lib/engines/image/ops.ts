@@ -5,6 +5,7 @@ import {
   canvasToOutput,
   createCanvas,
   decodeImage,
+  type DecodedImage,
   encodeCanvas,
   EXTENSION_BY_FORMAT,
   flattenIfOpaque,
@@ -15,9 +16,12 @@ import {
   computeResize,
   coverRect,
   FAVICON_SIZES,
+  MIN_SEARCH_QUALITY,
   normaliseCrop,
+  planShrink,
   searchQualityForSize,
   type ResizeMode,
+  type Size,
 } from "./geometry";
 
 /**
@@ -119,13 +123,79 @@ function sizeChange(before: number, after: number): string {
 /* Compress                                                            */
 /* ------------------------------------------------------------------ */
 
+/** How many times a target-size compression may redraw the image smaller. */
+const MAX_SHRINK_PASSES = 5;
+
+interface SizedAttempt {
+  bytes: Uint8Array;
+  size: Size;
+  hitTarget: boolean;
+}
+
+/** Draws the image at one size and returns the best encoding that fits the target. */
+async function encodeAtSize(
+  image: DecodedImage,
+  size: Size,
+  mime: string,
+  targetBytes: number,
+): Promise<SizedAttempt> {
+  const { canvas, context } = createCanvas(size.width, size.height);
+  context.drawImage(image.bitmap, 0, 0, size.width, size.height);
+  flattenIfOpaque(context, mime);
+
+  // Probe the quality floor first. When even that overshoots there is no point
+  // running the full search — the caller wants a smaller canvas, not a worse
+  // one — and this way a failed pass costs a single encode.
+  const floor = await encodeCanvas(canvas, mime, MIN_SEARCH_QUALITY);
+  if (floor.length > targetBytes) return { bytes: floor, size, hitTarget: false };
+
+  const search = await searchQualityForSize(targetBytes, async (quality) => {
+    const bytes = await encodeCanvas(canvas, mime, quality);
+    return bytes.length;
+  });
+
+  return { bytes: await encodeCanvas(canvas, mime, search.quality), size, hitTarget: true };
+}
+
+/**
+ * Compresses to a target file size, shrinking the dimensions when quality alone
+ * cannot get there.
+ *
+ * A 36-megapixel phone photograph cannot be squeezed into 100 KB by quality: at
+ * the point the artefacts are unbearable it is still several hundred KB, because
+ * the file is carrying eight thousand pixels of width. Asking for a size and
+ * being handed something five times larger is not an answer, so the target wins
+ * and the dimensions give way — reported, never silently.
+ */
+async function compressToTargetSize(
+  image: DecodedImage,
+  start: Size,
+  mime: string,
+  targetBytes: number,
+  allowResize: boolean,
+): Promise<SizedAttempt> {
+  let size = start;
+  let pass = 0;
+
+  while (true) {
+    const attempt = await encodeAtSize(image, size, mime, targetBytes);
+    if (attempt.hitTarget || !allowResize) return attempt;
+
+    const next = pass++ < MAX_SHRINK_PASSES ? planShrink(size, attempt.bytes.length, targetBytes) : null;
+    if (!next) return attempt;
+    size = next;
+  }
+}
+
 export const compressImage: FileOp = async (files, options, onProgress) => {
   const mode = str(options, "mode", "quality");
   const format = str(options, "format", "jpeg");
   const mime = MIME_BY_FORMAT[format] ?? "image/jpeg";
   const maxWidth = num(options, "maxWidth", 0);
+  const allowResize = bool(options, "allowResize", true);
 
   let missedTarget = 0;
+  const shrunk: string[] = [];
 
   const outputs = await eachFile(files, onProgress, async (image, name) => {
     // Resizing first is the single biggest saving on a phone photograph: a
@@ -136,22 +206,25 @@ export const compressImage: FileOp = async (files, options, onProgress) => {
         ? computeResize(image, "width", { width: maxWidth })
         : { width: image.width, height: image.height };
 
+    if (mode === "size") {
+      const targetBytes = num(options, "targetKb", 200) * 1024;
+      const attempt = await compressToTargetSize(image, target, mime, targetBytes, allowResize);
+
+      if (!attempt.hitTarget) missedTarget++;
+      else if (attempt.size.width !== target.width) {
+        shrunk.push(`${attempt.size.width}\u00d7${attempt.size.height}`);
+      }
+
+      return {
+        name: `${name}.${EXTENSION_BY_FORMAT[format] ?? "jpg"}`,
+        bytes: attempt.bytes,
+        mime,
+      };
+    }
+
     const { canvas, context } = createCanvas(target.width, target.height);
     context.drawImage(image.bitmap, 0, 0, target.width, target.height);
     flattenIfOpaque(context, mime);
-
-    if (mode === "size") {
-      const targetBytes = num(options, "targetKb", 200) * 1024;
-      const result = await searchQualityForSize(targetBytes, async (q) => {
-        const bytes = await encodeCanvas(canvas, mime, q);
-        return bytes.length;
-      });
-      if (!result.hitTarget) missedTarget++;
-
-      const bytes = await encodeCanvas(canvas, mime, result.quality);
-      return { name: `${name}.${EXTENSION_BY_FORMAT[format] ?? "jpg"}`, bytes, mime };
-    }
-
     return canvasToOutput(canvas, name, format, num(options, "quality", 75) / 100);
   });
 
@@ -166,10 +239,14 @@ export const compressImage: FileOp = async (files, options, onProgress) => {
       { label: "Saved", value: before > after ? `${Math.round((1 - after / before) * 100)}%` : "nothing" },
     ],
     note: missedTarget
-      ? `${missedTarget} image${missedTarget === 1 ? "" : "s"} could not reach the target size even at the lowest quality. Lower the maximum width as well — dimensions matter more than quality.`
-      : after >= before
-        ? "The result is no smaller than the original. That usually means the file was already well compressed, or PNG was chosen for a photograph — JPEG or WebP will do far better there."
-        : undefined,
+      ? allowResize
+        ? `${missedTarget} image${missedTarget === 1 ? "" : "s"} could not reach the target even at the smallest size worth producing. Ask for a larger target, or try WebP, which holds detail at sizes JPEG cannot.`
+        : `${missedTarget} image${missedTarget === 1 ? "" : "s"} could not reach the target on quality alone. Turn on \u201cResize to reach the target\u201d, or set a maximum width \u2014 dimensions matter more than quality.`
+      : shrunk.length
+        ? `Quality alone could not reach the target, so ${shrunk.length === 1 ? `the image was resized to ${shrunk[0]}` : `${shrunk.length} images were resized`}. Set a maximum width to control that yourself.`
+        : after >= before
+          ? "The result is no smaller than the original. That usually means the file was already well compressed, or PNG was chosen for a photograph \u2014 JPEG or WebP will do far better there."
+          : undefined,
   };
 };
 
