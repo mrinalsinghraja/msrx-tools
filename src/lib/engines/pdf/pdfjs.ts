@@ -13,31 +13,82 @@ import type { InputFile } from "../file-types";
 
 type PdfJs = typeof import("pdfjs-dist");
 
+/**
+ * Where pdf.js finds its runtime assets, all served from this origin.
+ *
+ * `standard_fonts` are the substitutes for Helvetica, Times and Courier, needed
+ * by almost every PDF ever made; `cmaps` are the character maps for CJK and
+ * other multi-byte encodings; `wasm` holds the optional image decoders. Without
+ * them `getDocument` still resolves and `page.render()` waits for ever on font
+ * data that never arrives.
+ *
+ * Serving them ourselves is also what keeps the site offline-capable: pdf.js
+ * would otherwise want a CDN, and this site makes no third-party requests.
+ */
+const ASSET_BASE = "/vendor/pdfjs";
+
+/**
+ * The worker script.
+ *
+ * This is a path to a file copied into public/ by scripts/copy-pdf-assets.mjs,
+ * NOT a module the bundler resolves. The previous version handed Turbopack a
+ * wrapper module and `new URL("./pdf.worker.ts", import.meta.url)`, which looks
+ * like the modern approach and quietly is not: Turbopack published the raw
+ * TypeScript source as a static asset, the browser served it as `video/mp2t`
+ * and refused to run it, the Worker fired an error event carrying no message,
+ * and pdf.js sat waiting for a handshake that could never arrive. Five tools
+ * showed a spinner that never stopped, with an empty console.
+ *
+ * Keep this in step with the copy script. A test fails if they disagree.
+ */
+const WORKER_SRC = `${ASSET_BASE}/pdf.worker.min.mjs`;
+
+/** Long enough for a slow phone on a big document; short enough to be an answer. */
+const OPEN_TIMEOUT_MS = 30_000;
+
 let pdfjs: PdfJs | null = null;
 
 async function getPdfJs(): Promise<PdfJs> {
   if (pdfjs) return pdfjs;
 
   const library = await import("pdfjs-dist");
-  // Hand pdf.js a worker we constructed ourselves, from a local wrapper module.
-  // `new URL` with a relative specifier is the only form the bundler rewrites
-  // into a real asset URL; a bare package path yields one that never resolves,
-  // and pdf.js then waits forever on a worker that never starts.
-  library.GlobalWorkerOptions.workerPort = new Worker(
-    new URL("./pdf.worker.ts", import.meta.url),
-    { type: "module" },
-  );
+  library.GlobalWorkerOptions.workerSrc = WORKER_SRC;
 
   pdfjs = library;
   return library;
 }
 
 /**
- * Where pdf.js finds its runtime assets. Copied into public/ at build time by
- * scripts/copy-pdf-assets.mjs — without them `getDocument` still resolves but
- * `page.render()` waits forever on font data that never arrives.
+ * Rejects rather than hanging.
+ *
+ * Every way the worker can fail to start — blocked, missing, wrong media type —
+ * looks identical from here: pdf.js waits for a message that never comes, with
+ * no error to catch. A promise that never settles is the worst failure a tool
+ * can have, because the person watching it has no idea whether to keep waiting.
+ * This turns it into a sentence.
  */
-const ASSET_BASE = "/vendor/pdfjs";
+function withTimeout<T>(work: Promise<T>, name: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(
+        new ToolError(
+          `The PDF engine did not start within ${OPEN_TIMEOUT_MS / 1000} seconds, so “${name}” could not be opened. Reload the page and try again; if it keeps happening, the browser is blocking the engine's worker script.`,
+        ),
+      );
+    }, OPEN_TIMEOUT_MS);
+
+    work.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
 export async function openDocument(file: InputFile): Promise<PDFDocumentProxy> {
   const library = await getPdfJs();
@@ -45,13 +96,16 @@ export async function openDocument(file: InputFile): Promise<PDFDocumentProxy> {
     // pdf.js takes ownership of the buffer it is given and detaches it, so a
     // copy is passed — otherwise a second tool run on the same dropped file
     // fails with a zero-length array.
-    return await library.getDocument({
-      data: new Uint8Array(file.bytes),
-      standardFontDataUrl: `${ASSET_BASE}/standard_fonts/`,
-      cMapUrl: `${ASSET_BASE}/cmaps/`,
-      cMapPacked: true,
-      wasmUrl: `${ASSET_BASE}/wasm/`,
-    }).promise;
+    return await withTimeout(
+      library.getDocument({
+        data: new Uint8Array(file.bytes),
+        standardFontDataUrl: `${ASSET_BASE}/standard_fonts/`,
+        cMapUrl: `${ASSET_BASE}/cmaps/`,
+        cMapPacked: true,
+        wasmUrl: `${ASSET_BASE}/wasm/`,
+      }).promise,
+      file.name,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (/password/i.test(message)) {

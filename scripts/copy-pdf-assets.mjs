@@ -29,6 +29,26 @@ for (const directory of ["standard_fonts", "cmaps", "wasm"]) {
   cpSync(join(packageRoot, directory), join(target, directory), { recursive: true });
 }
 
+/**
+ * The worker, copied rather than bundled.
+ *
+ * pdf.js does its parsing in a worker and will not start without one. Handing
+ * the bundler a wrapper module and `new URL("./pdf.worker.ts", import.meta.url)`
+ * looks like the modern way to do it and silently is not: Turbopack treats that
+ * as a static asset reference, so it published the raw TypeScript source at
+ * /_next/static/media/pdf.worker.<hash>.ts, served as `video/mp2t` because `.ts`
+ * is also a video extension. The browser refused it, the Worker fired an error
+ * event with no message, and pdf.js waited on a handshake that never came — an
+ * infinite spinner on five tools, with nothing in the console.
+ *
+ * Copying the prebuilt worker and pointing `workerSrc` at it takes the bundler
+ * out of the question entirely. It is the same file pdf.js ships to everyone.
+ *
+ * If this name changes, change WORKER_SRC in src/lib/engines/pdf/pdfjs.ts to
+ * match — there is a test that fails if the two ever disagree.
+ */
+cpSync(join(packageRoot, "build", "pdf.worker.min.mjs"), join(target, "pdf.worker.min.mjs"));
+
 console.log("pdf.js assets copied to public/vendor/pdfjs");
 
 /**

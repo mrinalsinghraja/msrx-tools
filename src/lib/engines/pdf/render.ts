@@ -40,7 +40,24 @@ async function renderPage(
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  await page.render({ canvas, canvasContext: context, viewport }).promise;
+  /**
+   * `intent: "print"` is not about printing. It is the only way to stop pdf.js
+   * driving its render loop with requestAnimationFrame.
+   *
+   * With the default display intent, each chunk of the page is scheduled with
+   * `requestAnimationFrame` — and a browser does not run animation frames in a
+   * tab that is not visible. Anyone who starts a conversion and switches tab
+   * while it works, which is the natural thing to do, comes back to a spinner
+   * that will never finish: no error, no failed request, nothing in the console.
+   * Print intent schedules on microtasks instead and runs to completion whether
+   * the tab is watched or not.
+   *
+   * It is also the more accurate description of what is happening here. This is
+   * a page being rasterised for export, not painted progressively on screen, and
+   * print intent renders annotations in their print appearance, which is what
+   * somebody exporting a page expects to get.
+   */
+  await page.render({ canvas, canvasContext: context, viewport, intent: "print" }).promise;
   return canvas;
 }
 
@@ -365,7 +382,9 @@ export const redactPdf: FileOp = async (files, options, onProgress) => {
     if (!context) throw new ToolError("This browser wouldn't provide a drawing surface.");
     context.fillStyle = "#ffffff";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    await page.render({ canvas, canvasContext: context, viewport }).promise;
+    // Print intent for the same reason as renderPage above: display intent
+    // schedules on requestAnimationFrame, which never fires in a hidden tab.
+    await page.render({ canvas, canvasContext: context, viewport, intent: "print" }).promise;
 
     // Paint over each match on the rendered image, then throw the original page
     // away entirely — the text cannot survive because it is never carried over.
