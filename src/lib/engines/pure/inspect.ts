@@ -332,12 +332,29 @@ const REPLACERS: Replacer[] = [
   {
     id: "ipv6",
     label: "IPV6",
-    pattern: /\b(?:[0-9a-f]{1,4}:){2,7}[0-9a-f]{1,4}\b/gi,
+    /*
+     * Two shapes, and no third: eight groups in full, or anything containing
+     * the `::` that stands for a run of zeroes.
+     *
+     * The obvious pattern — two to seven groups of hex — matches `10:00:01`,
+     * because digits are hex digits. Every timestamp in every log was being
+     * replaced with <IPV6_n>, which destroys the one field you always want to
+     * keep and labels it as something it is not. It also could not match a
+     * real compressed address like `fe80::1`, so it was wrong twice over.
+     */
+    // `\b` cannot open this: a compressed address may start with a colon, as
+    // `::1` does, and there is no word boundary before it. The guards say what
+    // is actually meant — not butted against another word or another group.
+    pattern:
+      /(?<![\w:])(?:(?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4}|(?:[0-9a-f]{1,4}(?::[0-9a-f]{1,4})*)?::(?:[0-9a-f]{1,4}(?::[0-9a-f]{1,4})*)?)(?![\w:])/gi,
   },
   {
     id: "card",
     label: "CARD",
-    pattern: /\b(?:\d[ -]?){13,19}\b/g,
+    // Anchored on a digit at both ends. The looser form ended on an optional
+    // separator, so it ate the space after the number and glued the next word
+    // onto the placeholder.
+    pattern: /\b\d(?:[ -]?\d){12,18}\b/g,
     accept: (match) => {
       const digits = match.replace(/\D/g, "");
       return digits.length >= 13 && digits.length <= 19 && passesLuhn(digits);

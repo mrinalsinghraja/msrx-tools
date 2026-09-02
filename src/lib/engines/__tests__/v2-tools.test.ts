@@ -534,3 +534,41 @@ describe("file encryption", () => {
     ).rejects.toThrow(/MSRXENC1/);
   });
 });
+
+describe("log anonymiser: what must survive", () => {
+  const clean = async (text: string) => (await run("logAnonymize", text)).output;
+
+  it("leaves the clock alone", async () => {
+    // The IPv6 pattern used to match any two-to-seven groups of hex separated
+    // by colons, and 10:00:01 is exactly that — so every timestamp in every
+    // log came back as <IPV6_1>, destroying the field you always want to keep
+    // and mislabelling it as an address.
+    const out = await clean("2026-09-02 10:00:01 request finished");
+    expect(out).toContain("10:00:01");
+    expect(out).not.toMatch(/IPV6/);
+  });
+
+  it("still masks a real IPv6 address, in both of its shapes", async () => {
+    expect(await clean("src=2001:0db8:85a3:0000:0000:8a2e:0370:7334")).toMatch(/<IPV6_1>/);
+    expect(await clean("src=fe80::1")).toMatch(/<IPV6_1>/);
+    expect(await clean("src=::1")).toMatch(/<IPV6_1>/);
+  });
+
+  it("does not eat the space after a card number", async () => {
+    // The pattern ended on an optional separator, so it consumed the space and
+    // glued the next word onto the placeholder: "<CARD_1>ok".
+    const out = await clean("card=4111111111111111 ok");
+    expect(out).toBe("card=<CARD_1> ok");
+  });
+
+  it("leaves a number that fails the Luhn check, because it is not a card", async () => {
+    const out = await clean("ref=4111111111111112 done");
+    expect(out).toContain("4111111111111112");
+  });
+
+  it("gives the same value the same token, so the log can still be followed", async () => {
+    const out = await clean("a=ada@example.test\nb=ada@example.test\nc=grace@navy.test");
+    expect(out.match(/<EMAIL_1>/g)).toHaveLength(2);
+    expect(out).toMatch(/<EMAIL_2>/);
+  });
+});

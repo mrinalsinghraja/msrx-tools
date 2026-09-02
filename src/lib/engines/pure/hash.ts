@@ -224,13 +224,20 @@ function humanDuration(seconds: number): string {
     [24, "hour"],
     [365, "day"],
     [100, "year"],
-    [Infinity, "century"],
+    // Bounded so the loop can fall through to the sentence below. Left at
+    // Infinity it always returned inside this branch, which is how
+    // "126,820,267,937,042,090,000 centuries" reached the page — a number that
+    // tells the reader nothing except that it is a large one.
+    [1000, "century"],
   ];
   let value = seconds;
   for (const [factor, name] of units) {
     if (value < factor) {
       const rounded = value < 10 ? Math.round(value * 10) / 10 : Math.round(value);
-      return `${rounded.toLocaleString()} ${name}${rounded === 1 ? "" : "s"}`;
+      // "centurys" was reaching the page: an -s is wrong for a word ending in
+      // -y, and this is the only plural in the table that does.
+      const plural = rounded === 1 ? name : name === "century" ? "centuries" : `${name}s`;
+      return `${rounded.toLocaleString()} ${plural}`;
     }
     value /= factor;
   }
@@ -248,9 +255,32 @@ export const passwordStrength: PureOp = (input, options): OpResult => {
   const penalties: string[] = [];
   let entropy = rawEntropy;
 
+  // Exact matching alone is close to useless here. "password" is caught and
+  // "password123" is not, though it sits just as high in every breach list —
+  // and it was being called Reasonable, with four hours to crack, when a word
+  // list finds it instantly. Almost every common password is a common word
+  // with something stuck on the end, so the stem is what has to be checked.
+  const stem = lower
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/[0-9]+$/, "")
+    .replace(/0/g, "o")
+    .replace(/1/g, "i")
+    .replace(/3/g, "e")
+    .replace(/4/g, "a")
+    .replace(/5/g, "s")
+    .replace(/7/g, "t")
+    .replace(/@/g, "a");
+
   if (COMMON.has(lower)) {
     entropy = Math.min(entropy, 8);
     penalties.push("This is one of the most-guessed passwords in existence.");
+  } else if (stem.length >= 4 && COMMON.has(stem)) {
+    // Decorating a known password does add a little work for an attacker, but
+    // only a little: the word lists have carried these variations for years.
+    entropy = Math.min(entropy, 16);
+    penalties.push(
+      "This is a well-known password with characters added. Word lists have covered that trick for decades — it is guessed nearly as fast as the bare word.",
+    );
   }
   const uniqueRatio = new Set(password).size / password.length;
   if (uniqueRatio < 0.5) {

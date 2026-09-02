@@ -197,3 +197,38 @@ describe("random string", () => {
     );
   });
 });
+
+describe("password strength: the decorated common word", () => {
+  const check = async (password: string) => (await passwordStrength(password, {})).output;
+
+  it("does not call a top-of-the-breach-list password reasonable", async () => {
+    // "password123" was rated Reasonable at 48 bits, four hours to crack. A
+    // word list finds it in the first thousand guesses.
+    const out = await check("password123");
+    expect(out).toMatch(/Verdict\s+Very weak/);
+    expect(out).toMatch(/well-known password with characters added/);
+  });
+
+  it("catches the same trick with punctuation and leetspeak", async () => {
+    for (const password of ["Password1!", "p4ssw0rd", "qwerty!!", "letmein2026"]) {
+      expect(await check(password), password).toMatch(/Verdict\s+(Very weak|Weak)/);
+    }
+  });
+
+  it("still calls the bare word what it is", async () => {
+    expect(await check("password")).toMatch(/most-guessed passwords in existence/);
+  });
+
+  it("does not punish a long passphrase that merely contains a common word", async () => {
+    // The stem is what is looked up, so a real passphrase must not be caught
+    // by it — otherwise the check would push people away from good passwords.
+    const out = await check("password-of-the-seven-locked-gates");
+    expect(out).toMatch(/Verdict\s+(Strong|Very strong)/);
+  });
+
+  it("writes centuries, not centurys, and stops piling on zeroes", async () => {
+    const out = await check("Tr0ub4dor&3-correct-horse-battery-staple-xyzzy");
+    expect(out).not.toMatch(/centurys/);
+    expect(out).toMatch(/Time to crack\s+(effectively forever|[\d,.]+ centuries)/);
+  });
+});
