@@ -31,7 +31,7 @@ export const videoThumbnail: FileOp = async (files, options, onProgress) => {
       const at = parseTimecode(str(options, "at"), 0);
       if (at > facts.duration) {
         throw new ToolError(
-          `There is no frame at ${at.toFixed(1)} seconds — “${file.name}” runs for ${facts.duration.toFixed(1)}.`,
+          `There is no frame at ${at.toFixed(1)} seconds — “${file.name}” runs for ${facts.duration.toFixed(1)} seconds.`,
         );
       }
 
