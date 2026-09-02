@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MSRX Tools
 
-## Getting Started
+**[tools.msrx.co.in](https://tools.msrx.co.in)** — 116 file, image, PDF and text tools that run entirely in your browser.
 
-First, run the development server:
+Nothing is uploaded. There is no account, no quota, no paid tier. Open the site in a private window and every tool works.
+
+## Why it's built this way
+
+Most "free online tools" are upload forms. Your file goes to someone's server, gets processed, and you take their word for what happened to it afterwards. That is a bad trade for a file you only wanted to rename.
+
+So the constraint here is architectural, not a promise: the work happens in the page. PDFs go through `pdf-lib` and `pdfjs-dist`, archives through `fflate` (plain JavaScript deflate, not WASM, so it works on a phone and offline), encryption through the Web Crypto API. There is no upload endpoint to trust because there is no upload endpoint.
+
+## What's in it
+
+116 tools across seven categories, counted from the registry rather than typed into this sentence:
+
+| Category | Tools |
+|---|---|
+| Developer | 28 |
+| Text | 20 |
+| Security | 18 |
+| PDF | 17 |
+| Image | 15 |
+| Calculators | 15 |
+| Files & archives | 3 |
+
+## How it's structured
+
+Every tool is one `ToolSpec` in `src/lib/tools/catalog/` and one content entry beside it. The registry in `src/lib/tools/registry.ts` is the single source of truth — routing, navigation, search, the sitemap, the internal link matrix and the smoke tests all read from it. Adding a tool means adding data, not wiring.
+
+Execution is separated from description. A `ToolSpec` names an engine and an operation; the engines in `src/lib/engines/` (`pdf`, `image`, `archive`, `crypto`, `pure`) do the work and know nothing about pages or routing.
+
+Two build gates worth knowing about:
+
+- **`check:content --strict`** runs in `prebuild`, so a tool added without its written page fails the build. It checks for *reuse* rather than word count — no sentence or eight-word phrase may repeat across pages — because filler is long by nature and length proves nothing. It caught four self-plagiarised sentences mid-write and four defects in pages that had already shipped.
+- **449 tests across 16 files**, including an option-contract suite that exists because of a real bug class: a dropdown that silently changed what its neighbours *meant* without changing them. Three tools were affected.
+
+## Stack
+
+Next.js 16 · React 19 · TypeScript · Tailwind v4 · Radix UI · Zustand · pdf-lib · pdfjs-dist · fflate · Web Crypto
+
+The optional per-tool AI assistant calls Groq. Its key is server-side only and never reaches the browser; every tool works with the assistant switched off.
+
+## Running it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`npm test` runs the suite, `npm run typecheck` the types, `npm run check:content:strict` the content gate.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Licence
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No licence is granted. The source is public to read, not to redistribute.
