@@ -581,6 +581,82 @@ JPEG suits pages that are mostly photographs. PNG suits pages that are mostly te
     ],
   },
 
+  "unlock-pdf": {
+    intro: `A locked PDF is locked in one of two ways, and knowing which one you are holding decides everything about what happens next.
+
+The first is a user password, sometimes called an open password. The document's contents are genuinely scrambled with a cipher, and the password is the key. Nothing can read a single word of it — not a reader, not this page, not the person who wrote it — until the correct key is supplied. If you have the password, this removes it and writes a plain copy. If you do not, nobody can help you, and any website promising otherwise is either wrong or selling something.
+
+The second is an owner password, and it is a much stranger thing. The document opens for anyone who clicks it. Inside is a note saying which activities the author would prefer you did not perform: printing, copying text, filling the form, extracting a page. Well-mannered readers obey that note. It is a request rather than a barrier, which is why a document you can already read on screen can still refuse to print. Lifting it needs no password, because there was never anything sealed.
+
+Almost everyone who arrives looking to unlock a PDF has the second kind: a form from an office that will not let itself be filled in, a report that refuses to print, a scan that will not give up its text to a copy-paste. That is a formatting obstacle wearing a padlock icon, and it comes off here in a second.
+
+The work is done by qpdf, the same tool the Unix world has used for two decades, compiled to WebAssembly and running inside this tab. Your document is not sent anywhere. Given the kind of file that tends to be protected in the first place — tax papers, salary slips, legal drafts, medical results — uploading one to an unknown server in order to make it more accessible would be an odd bargain.
+
+The decrypted copy is byte-for-byte the same document underneath: the same pages, the same fonts, the same selectable text. Only the encryption layer is gone.`,
+    steps: [
+      "Drop in the PDF that is refusing to cooperate.",
+      "If it asks for a password when you open it normally, type that password in the box. If it opens fine but blocks printing or copying, leave the box empty.",
+      "Run the tool. The result tells you which of the two kinds of lock it found.",
+      "Download the plain copy.",
+    ],
+    faq: [
+      {
+        q: "Can this open a PDF when I have forgotten the password?",
+        a: "No, and neither can anything else. The document body is encrypted with AES, and the password is the key that decrypts it. Without the key there is nothing to read — the bytes are noise. Any service claiming to recover a forgotten open password is either guessing common words or taking your money.",
+      },
+      {
+        q: "Then why does it work on my file without a password?",
+        a: "Because your file almost certainly carries an owner password rather than an open one. It was never sealed; it simply asks readers not to print or copy. Removing that request needs no key, which is exactly why the document opened for you in the first place.",
+      },
+      {
+        q: "Is it legal to remove the restrictions?",
+        a: "That depends on the document and where you are, and it is a question about your rights over the file rather than about the software. Removing a restriction from your own bank statement or a form you were sent to complete is uncontroversial. Circumventing protection on material you have no right to use is not, whatever tool is involved.",
+      },
+      {
+        q: "Does the document change in any other way?",
+        a: "No. The pages, text layer, images and fonts come through untouched — only the encryption dictionary is dropped. Digital signatures are the exception: a signed document that is rewritten no longer matches what was signed.",
+      },
+    ],
+  },
+
+  "protect-pdf": {
+    intro: `Putting a password on a PDF is the one thing in this whole toolbox where uploading the file to a website is not merely careless but self-defeating. The point of the exercise is that only people holding a secret should be able to read the document. Handing an unprotected copy, plus the secret, to a stranger's server first is a curious way to begin.
+
+So this runs where it should: in your browser, with qpdf compiled to WebAssembly. Neither the file nor the password ever crosses the network.
+
+The encryption is AES-256, which is the strongest thing the PDF format defines and the same primitive that protects a bank transaction. Weaker options exist in the specification — RC4 at 40 and 128 bits, both broken and both still offered by plenty of tools — and they are not offered here, because a lock that opens with a hairpin is worse than an honest absence of one: it invites the trust it cannot repay.
+
+Two passwords can go on a document, and they do different jobs. The one you set to open the file is a real key. The optional second one governs whether the permission switches below can be changed, and it exists for a narrow case: sending a report that anyone may read but that your own department can still unlock and edit. Leave it blank and the opening password does both.
+
+The permission switches deserve a candid description. Barring printing or copying is a flag inside the document, and readers honour it as a matter of convention. Adobe Reader and Preview will respect it. A determined person with different software will not, and cannot be made to. Treat those switches as a signpost, not a wall — the password is the part that actually holds.
+
+Which brings up the only real danger here. A file encrypted with AES-256 and a lost password is gone. Not recoverable with effort, not recoverable with the right service: gone, permanently. Write the password down somewhere before you close the tab.`,
+    steps: [
+      "Drop in the PDF you want to lock. Several at once is fine — they all get the same password.",
+      "Type the password that will be needed to open it, and store it somewhere safe first.",
+      "Decide whether printing, copying text and editing should be permitted.",
+      "Run the tool and download the encrypted file. Test it once by opening it before you send it on.",
+    ],
+    faq: [
+      {
+        q: "How strong is the protection?",
+        a: "The cipher is AES-256, which is not the weak point of any real system. Your password is. A document locked with a dictionary word can be opened by someone working through dictionary words, so pick a long passphrase — several unrelated words beat a short string of punctuation.",
+      },
+      {
+        q: "Can you recover the password if I lose it?",
+        a: "No. Nothing about the password is stored in the file, and nothing about your file is stored here. A lost password means a document nobody will read again, including us. This is the honest consequence of encryption that actually works.",
+      },
+      {
+        q: "Why can I still not stop someone copying the text?",
+        a: "Because that restriction is a request recorded in the document rather than a mathematical barrier. Compliant readers honour it; other software ignores it. If text must not be readable by a particular person, the answer is to withhold the password from them, or to remove the sensitive part with the redaction tool before locking the file.",
+      },
+      {
+        q: "How do I send the password to the recipient?",
+        a: "By some route other than the one carrying the file. A password in the same email as the attachment protects against nothing, since anyone reading the message has both halves. A phone call or a separate messaging app is enough.",
+      },
+    ],
+  },
+
   "jpg-to-pdf": {
     intro: `Combining images into a single PDF is how a set of photographs becomes a document. Photographed receipts for an expense claim, pages of a form captured with a phone, scanned certificates for an application — all of them want to arrive as one file rather than eleven attachments.
 

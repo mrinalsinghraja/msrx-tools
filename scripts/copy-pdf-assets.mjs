@@ -30,3 +30,24 @@ for (const directory of ["standard_fonts", "cmaps", "wasm"]) {
 }
 
 console.log("pdf.js assets copied to public/vendor/pdfjs");
+
+/**
+ * qpdf's WebAssembly build, for the password tools.
+ *
+ * It is copied rather than imported because the package is an Emscripten
+ * CommonJS bundle that reaches for `fs`, `path` and `crypto` behind Node guards
+ * a browser bundler cannot see through — and because its 1.3 MB payload has no
+ * business in the main bundle. `src/lib/engines/pdf/qpdf.ts` loads it from here
+ * with a script tag, on the first run of a tool that needs it.
+ */
+const qpdfRoot = dirname(require.resolve("@neslinesli93/qpdf-wasm/package.json"));
+const qpdfTarget = join(process.cwd(), "public", "vendor", "qpdf");
+
+rmSync(qpdfTarget, { recursive: true, force: true });
+mkdirSync(qpdfTarget, { recursive: true });
+
+for (const file of ["qpdf.js", "qpdf.wasm"]) {
+  cpSync(join(qpdfRoot, "dist", file), join(qpdfTarget, file));
+}
+
+console.log("qpdf assets copied to public/vendor/qpdf");

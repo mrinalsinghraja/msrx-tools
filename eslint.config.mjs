@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored WebAssembly builds, copied in by scripts/copy-pdf-assets.mjs.
+    // Minified third-party output with nothing for a linter to improve.
+    "public/vendor/**",
   ]),
 ]);
 

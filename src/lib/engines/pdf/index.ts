@@ -2,6 +2,7 @@ import type { FileOp } from "../file-types";
 
 import { addPageNumbers, addWatermark, cropPdf, signPdf } from "./edit";
 import { jpgToPdf } from "./images";
+import { protectPdf, unlockPdf } from "./protect";
 import {
   extractPages,
   mergePdf,
@@ -38,6 +39,8 @@ export const PDF_OPS: Record<string, FileOp> = {
   pdfToMarkdown,
   comparePdf,
   redactPdf,
+  unlockPdf,
+  protectPdf,
 };
 
 export function getPdfOp(name: string): FileOp | undefined {
@@ -58,10 +61,12 @@ export {
   organizePdf,
   pdfToJpg,
   pdfToMarkdown,
+  protectPdf,
   redactPdf,
   removePages,
   repairPdf,
   rotatePdf,
   signPdf,
   splitPdf,
+  unlockPdf,
 };
