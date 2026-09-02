@@ -162,7 +162,40 @@ const NAMED_ENTITIES: Record<string, string> = {
   frac12: "½",
   frac14: "¼",
   frac34: "¾",
+  ...latin1Letters(),
 };
+
+/**
+ * The accented Latin letters, derived rather than typed out.
+ *
+ * These names map onto a contiguous block: `Agrave` is U+00C0 and the sequence
+ * runs in order to `yuml` at U+00FF, stepping over × and ÷ which are symbols
+ * and are listed above. Sixty-two hand-written name-to-character pairs would be
+ * sixty-two chances to pair a name with the wrong letter, and the mistake would
+ * be invisible on review — every value looks plausible.
+ *
+ * They were missing entirely, which meant this tool could not decode its own
+ * example: "Caf&eacute;" came back with the entity still in it.
+ */
+function latin1Letters(): Record<string, string> {
+  const names =
+    "Agrave Aacute Acirc Atilde Auml Aring AElig Ccedil Egrave Eacute Ecirc Euml " +
+    "Igrave Iacute Icirc Iuml ETH Ntilde Ograve Oacute Ocirc Otilde Ouml Oslash " +
+    "Ugrave Uacute Ucirc Uuml Yacute THORN szlig " +
+    "agrave aacute acirc atilde auml aring aelig ccedil egrave eacute ecirc euml " +
+    "igrave iacute icirc iuml eth ntilde ograve oacute ocirc otilde ouml oslash " +
+    "ugrave uacute ucirc uuml yacute thorn yuml";
+
+  const table: Record<string, string> = {};
+  let code = 0xc0;
+  for (const name of names.split(" ")) {
+    // × (U+00D7) and ÷ (U+00F7) sit inside the range but are not letters.
+    while (code === 0xd7 || code === 0xf7) code++;
+    table[name] = String.fromCodePoint(code);
+    code++;
+  }
+  return table;
+}
 
 export const htmlDecode: PureOp = (input): OpResult => {
   const out = input.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g, (whole, body: string) => {

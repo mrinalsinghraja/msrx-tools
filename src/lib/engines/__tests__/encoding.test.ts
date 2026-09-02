@@ -145,3 +145,44 @@ describe("query string", () => {
     expect(JSON.parse(result.output)).toEqual({ flag: "", x: "1" });
   });
 });
+
+describe("html entity decoding of accented letters", () => {
+  const decode = async (text: string) => (await run(htmlDecode, text)).output;
+
+  it("decodes the tool's own example, which it could not before", async () => {
+    // The named-entity table held punctuation and symbols but no letters, so
+    // the sample loaded by "Try an example" came back half-decoded — the tool
+    // failing in front of anyone who clicked it.
+    expect(await decode("&lt;p&gt;Caf&eacute; &amp; cr&egrave;me&lt;/p&gt;")).toBe("<p>Café & crème</p>");
+  });
+
+  it("covers the whole Latin-1 block, including both ends", async () => {
+    expect(await decode("&Agrave;")).toBe("À");
+    expect(await decode("&yuml;")).toBe("ÿ");
+    expect(await decode("&szlig;")).toBe("ß");
+    expect(await decode("&ntilde;")).toBe("ñ");
+    expect(await decode("&Ouml;")).toBe("Ö");
+  });
+
+  it("steps over the two symbols inside that range rather than shifting past them", async () => {
+    // × and ÷ sit at U+00D7 and U+00F7. An off-by-one there would pair every
+    // later name with the wrong letter, and each one would still look plausible.
+    expect(await decode("&Oslash;")).toBe("Ø");
+    expect(await decode("&oslash;")).toBe("ø");
+    expect(await decode("&times;")).toBe("×");
+    expect(await decode("&divide;")).toBe("÷");
+  });
+
+  it("round-trips with the encoder for non-ASCII text", async () => {
+    const original = "Café & crème brûlée — naïve señor";
+    const encoded = (await run(htmlEncode, original, { nonAscii: true })).output;
+    expect(encoded).not.toBe(original);
+    expect(await decode(encoded)).toBe(original);
+  });
+
+  it("leaves an unknown entity alone rather than guessing", async () => {
+    // Greek and mathematical names are outside the table. Passing them through
+    // untouched is the honest answer: the reader can see what was not understood.
+    expect(await decode("&notarealentity; &alpha;")).toBe("&notarealentity; &alpha;");
+  });
+});

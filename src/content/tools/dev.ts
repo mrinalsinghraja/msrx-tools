@@ -840,7 +840,7 @@ So this tool is right for the ordinary case and for understanding what encoding 
   "html-entity-decode": {
     intro: `Text extracted from a web page, an RSS feed or a database column often arrives with its entities still in place: &amp;amp; where an ampersand belongs, &amp;#39; where an apostrophe should be, &amp;nbsp; scattered through the spacing. This turns them back into the characters they stand for.
 
-It handles named entities, decimal numeric references and hexadecimal ones, which covers everything a browser will have produced.
+It handles decimal and hexadecimal numeric references, which have no vocabulary to fall short of, and the named entities in everyday use: the five XML ones, the typographic marks, the currency and legal symbols, and every accented Latin letter. HTML defines well over two thousand names in total, reaching into Greek and mathematics, and a name outside that everyday set is left exactly as it was found rather than guessed at — so nothing is silently mangled, and you can see what was not understood.
 
 Double encoding is the most common thing this reveals, and it shows up as &amp;amp;amp; in the output. That sequence means an already-encoded ampersand was encoded again, usually because one layer of code escaped a value that a framework had already escaped. Decode a second time to confirm, then fix the layer doing the extra work rather than decoding twice in production.
 
