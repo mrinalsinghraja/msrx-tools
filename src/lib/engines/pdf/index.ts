@@ -14,6 +14,8 @@ import {
 } from "./organize";
 import { comparePdf, compressPdf, pdfToJpg, pdfToMarkdown, redactPdf } from "./render";
 
+export { renderFirstPage } from "./render";
+
 /**
  * Every PDF op, keyed by the `op` name in the tool registry. The registry test
  * checks each pdf tool's op has an entry here, so a typo fails the build.

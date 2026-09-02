@@ -22,9 +22,18 @@ import type { OptionValues, ToolSpec } from "@/lib/tools/types";
  * re-running on every keystroke would make the page stutter.
  */
 
-/** Beyond this the work is slow enough to be felt between keystrokes. */
+/**
+ * Beyond this the work is slow enough to be felt between keystrokes.
+ *
+ * PDFs get a lower ceiling than images because they cost twice: the tool runs,
+ * and then page one of its output has to be rasterised before there is anything
+ * to look at.
+ */
 const LIVE_PREVIEW_BYTE_LIMIT = 12 * 1024 * 1024;
+const PDF_PREVIEW_BYTE_LIMIT = 6 * 1024 * 1024;
 const DEBOUNCE_MS = 280;
+
+const PDF_MIME = "application/pdf";
 
 const TEXT_TYPES = new Set(["text/plain", "text/csv", "application/json", "text/markdown"]);
 
@@ -34,9 +43,12 @@ interface Rendered {
   url: string | null;
   text: string | null;
   name: string;
+  /** The size of the real output, not of the picture standing in for it. */
   bytes: number;
   mime: string;
   count: number;
+  /** Page count, when the output was a PDF rendered down to an image. */
+  pages?: number;
 }
 
 export function LivePreview({
@@ -57,7 +69,8 @@ export function LivePreview({
   const runId = useRef(0);
   const urlRef = useRef<string | null>(null);
 
-  const tooLarge = file ? file.bytes.length > LIVE_PREVIEW_BYTE_LIMIT : false;
+  const limit = tool.engine === "pdf" ? PDF_PREVIEW_BYTE_LIMIT : LIVE_PREVIEW_BYTE_LIMIT;
+  const tooLarge = file ? file.bytes.length > limit : false;
 
   useEffect(() => {
     if (!file || tooLarge) return;
@@ -78,12 +91,26 @@ export function LivePreview({
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         urlRef.current = null;
 
-        const isText = TEXT_TYPES.has(first.mime);
         let url: string | null = null;
         let text: string | null = null;
+        let pages: number | undefined;
 
-        if (isText) {
+        if (TEXT_TYPES.has(first.mime)) {
           text = new TextDecoder().decode(first.bytes);
+        } else if (first.mime === PDF_MIME) {
+          // A PDF cannot go in an <img>, and an embed brings its own viewer,
+          // toolbar and scrollbars to fight the layout. Page one is rendered to
+          // a picture instead, by the same engine the tools use. Imported here
+          // rather than at the top so a page with no PDF on it never downloads
+          // pdf.js.
+          const { renderFirstPage } = await import("@/lib/engines/pdf");
+          const page = await renderFirstPage(first.bytes);
+          if (id !== runId.current) return;
+
+          const blob = new Blob([page.bytes as unknown as BlobPart], { type: page.mime });
+          url = URL.createObjectURL(blob);
+          urlRef.current = url;
+          pages = page.pages;
         } else {
           const blob = new Blob([first.bytes as unknown as BlobPart], { type: first.mime });
           url = URL.createObjectURL(blob);
@@ -98,6 +125,7 @@ export function LivePreview({
           bytes: first.bytes.length,
           mime: first.mime,
           count: result.files.length,
+          pages,
         });
         setError(null);
       } catch (thrown) {
@@ -176,6 +204,11 @@ export function LivePreview({
       <p className="text-xs leading-relaxed text-graphite-faint">
         This is the real operation running on your first file, not an approximation of it — what you
         see is what the download will contain.
+        {current?.pages
+          ? current.pages > 1
+            ? ` Page 1 of ${current.pages}, drawn from the result.`
+            : " The result's only page, drawn from the file itself."
+          : ""}
         {current && current.count > 1 ? " Only the first output is shown." : ""}
       </p>
     </section>

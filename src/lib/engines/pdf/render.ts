@@ -71,6 +71,43 @@ async function canvasToBytes(
   return new Uint8Array(await blob.arrayBuffer());
 }
 
+/**
+ * Rasterises page one of a PDF so a result can be shown on screen.
+ *
+ * A browser cannot display a PDF blob usefully inside a panel — an embed or an
+ * iframe brings its own viewer, its own toolbar and its own scrollbars, and
+ * fights the layout around it. Turning the first page into an image gives a
+ * plain picture that behaves like every other preview on the site.
+ *
+ * The document is destroyed afterwards, which matters more here than in the
+ * tools: a live preview re-runs on every change, and each parsed document is
+ * held in the worker until it is told otherwise.
+ */
+export async function renderFirstPage(
+  bytes: Uint8Array,
+  maxWidth = 900,
+): Promise<{ bytes: Uint8Array; mime: string; pages: number }> {
+  const document = await openDocument({ name: "preview.pdf", bytes });
+  try {
+    const page = await document.getPage(1);
+    const unscaled = page.getViewport({ scale: 1 });
+    // Enough to read, never more than the panel can show. Two is the ceiling so
+    // a business card sized PDF does not render at ten times its size.
+    const scale = Math.min(2, Math.max(0.1, maxWidth / unscaled.width));
+
+    const canvas = await renderPage(document, 1, scale);
+    return {
+      bytes: await canvasToBytes(canvas, "image/png", 1),
+      mime: "image/png",
+      pages: document.numPages,
+    };
+  } finally {
+    // `destroy` lives on the loading task rather than the document, and it is
+    // the call that actually releases the parsed document inside the worker.
+    await document.loadingTask.destroy();
+  }
+}
+
 export const pdfToJpg: FileOp = async (files, options, onProgress) => {
   requireFiles(files);
   // Say something before opening the document: the first call in a session
