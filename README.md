@@ -4,6 +4,10 @@
 
 Nothing is uploaded. There is no account, no quota, no paid tier. Open the site in a private window and every tool works.
 
+![Compressing a 2.53 MB photo down to 1.17 MB — the whole operation runs in the tab, nothing is uploaded](docs/demo.gif)
+
+*A real 2.53 MB JPEG, compressed to 1.17 MB. The network tab stays empty the entire time.*
+
 ![MSRX Tools — every file tool you need, none of them upload your files](docs/screenshot.png)
 
 ## Why it's built this way
