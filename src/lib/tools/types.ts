@@ -19,7 +19,8 @@ export type CategoryId =
   | "text"
   | "dev"
   | "security"
-  | "calc";
+  | "calc"
+  | "video";
 
 /** Which worker bundle runs the op. `pure` needs no WASM and no worker warm-up. */
 export type EngineId =
@@ -30,7 +31,8 @@ export type EngineId =
   | "archive"
   | "data"
   | "crypto"
-  | "audio";
+  | "audio"
+  | "video";
 
 /**
  * The shape of the tool's workspace.
@@ -207,7 +209,7 @@ export interface ToolSpec {
    * separate recording workspace — would have duplicated the whole file list,
    * options panel and result tray for one button.
    */
-  record?: boolean;
+  record?: "mic" | "camera" | "screen";
   /** Sibling slugs. Drives the internal link matrix and the "related tools" rail. */
   related: string[];
   /** lucide-react icon name, e.g. "FileText". */

@@ -330,7 +330,7 @@ export const AUDIO_TOOLS: ToolSpec[] = [
     op: "exportRecording",
     accepts: AUDIO_IN,
     output: AUDIO_OUT,
-    record: true,
+    record: "mic",
     options: [
       {
         kind: "toggle",

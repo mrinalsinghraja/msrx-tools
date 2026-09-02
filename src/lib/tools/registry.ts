@@ -7,6 +7,7 @@ import { IMAGE_TOOLS } from "./catalog/image";
 import { PDF_TOOLS } from "./catalog/pdf";
 import { SECURITY_TOOLS } from "./catalog/security";
 import { TEXT_TOOLS } from "./catalog/text";
+import { VIDEO_TOOLS } from "./catalog/video";
 import type { CategoryId, ToolSpec } from "./types";
 
 /**
@@ -19,6 +20,7 @@ import type { CategoryId, ToolSpec } from "./types";
 export const TOOLS: ToolSpec[] = [
   ...PDF_TOOLS,
   ...IMAGE_TOOLS,
+  ...VIDEO_TOOLS,
   ...AUDIO_TOOLS,
   ...FILE_TOOLS,
   ...TEXT_TOOLS,

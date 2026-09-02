@@ -43,11 +43,41 @@ If MP3 output ever needs to stop depending on an LGPL library, the replacement
 is WebCodecs `AudioEncoder`, which is in every current browser but not in enough
 older ones to rely on today.
 
+## Video
+
+- **Mediabunny** — MPL-2.0. Reads and writes MP4, MOV, WebM, MKV, MPEG-TS, MP3,
+  WAV and Ogg containers in TypeScript, and drives the browser's own WebCodecs
+  encoders and decoders. MPL is file-level copyleft: it attaches to Mediabunny's
+  own files, not to the code that imports them. Nothing in it is modified here,
+  so the obligation is to keep the notice, which the unmodified `LICENSE` inside
+  `node_modules/mediabunny` satisfies.
+
+  No codec ships with it. Every encoder and decoder the video tools use is part
+  of the browser already, which is why there is no WebAssembly blob behind this
+  category and no patent question for this project to answer — the same H.264
+  decoder that plays video on any other website does the work here.
+
+- **gifenc** — MIT. Colour quantisation and GIF writing, for Video to GIF.
+  Roughly ten kilobytes and loaded only on that page.
+
 ## What was deliberately not used
 
 - **MuPDF** — AGPL-3.0. Excellent renderer; the licence would reach the whole
   site, which is not a trade this project is willing to make.
 - **FFmpeg (`@ffmpeg/ffmpeg`)** — the default build is LGPL and the `-gpl` build
-  is GPL. Not shipped, for size and cross-origin-isolation reasons rather than
-  licence ones: the audio tools are arithmetic in
-  `src/lib/engines/audio/dsp.ts` instead.
+  is GPL. Not shipped, and the reasons have only got stronger since the video
+  tools arrived:
+
+  1. **Size.** The core is around thirty megabytes of WebAssembly, downloaded
+     before the first click can do anything.
+  2. **Cross-origin isolation.** The multithreaded build needs
+     `SharedArrayBuffer`, which needs COOP and COEP headers. `require-corp`
+     breaks third-party fonts and embeds across every other page on this site,
+     so the cost would fall on the hundred and twenty tools that have no use
+     for it.
+  3. **Licence.** A GPL build served to a browser is distribution, and that is
+     a question this project would rather not have to answer.
+
+  The audio tools are arithmetic in `src/lib/engines/audio/dsp.ts`, and the
+  video tools use WebCodecs — the codecs the browser already ships in order to
+  play video — through Mediabunny.

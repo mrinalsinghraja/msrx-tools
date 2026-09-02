@@ -8,6 +8,7 @@ import { IMAGE_CONTENT } from "./image";
 import { PDF_CONTENT } from "./pdf";
 import { SECURITY_CONTENT } from "./security";
 import { TEXT_CONTENT } from "./text";
+import { VIDEO_CONTENT } from "./video";
 
 /**
  * Server-only SEO prose, kept out of the client bundle. A tool page imports this
@@ -23,6 +24,7 @@ export const TOOL_CONTENT: Record<string, ToolContent> = {
   ...SECURITY_CONTENT,
   ...FILE_CONTENT,
   ...IMAGE_CONTENT,
+  ...VIDEO_CONTENT,
   ...AUDIO_CONTENT,
   ...CALC_CONTENT,
   ...PDF_CONTENT,

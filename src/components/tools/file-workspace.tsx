@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, Download, FileIcon, Trash2, Upload } from "lucide-r
 import { useCallback, useRef, useState } from "react";
 
 import { ImageStage } from "@/components/tools/image-stage";
-import { MicRecorder } from "@/components/tools/mic-recorder";
+import { Recorder } from "@/components/tools/recorder";
 import { LivePreview } from "@/components/tools/live-preview";
 import { OptionsPanel } from "@/components/tools/options-panel";
 import { Button, Notice, Stat } from "@/components/ui/primitives";
@@ -151,7 +151,7 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
           <Button variant="primary" className="mt-4" onClick={() => inputRef.current?.click()}>
             Choose {multiple ? "files" : "a file"}
           </Button>
-          {tool.record ? <MicRecorder onRecorded={(file) => void addFiles([file])} /> : null}
+          {tool.record ? <Recorder mode={tool.record} onRecorded={(file) => void addFiles([file])} /> : null}
           <input
             ref={inputRef}
             type="file"

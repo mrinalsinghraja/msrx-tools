@@ -20,6 +20,15 @@ export const CATEGORIES: Category[] = [
       "Resize, crop, compress and convert using the browser's own image engine — no plugin, no upload, and fast enough that a batch finishes before a competitor's page has loaded.",
   },
   {
+    id: "video",
+    slug: "video",
+    title: "Video",
+    short: "Trim, crop, compress, convert",
+    icon: "Video",
+    blurb:
+      "Cut, resize, rotate, join and compress video using the codecs the browser already ships for playing it — no plugin, no upload, and no thirty-megabyte download before the first click.",
+  },
+  {
     id: "audio",
     slug: "audio",
     title: "Audio",

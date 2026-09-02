@@ -52,6 +52,7 @@ export async function runFileTool(
     archive: async () => (await import("./archive")).getArchiveOp,
     crypto: async () => (await import("./crypto")).getCryptoOp,
     audio: async () => (await import("./audio")).getAudioOp,
+    video: async () => (await import("./video")).getVideoOp,
   };
 
   const load = loaders[tool.engine];
