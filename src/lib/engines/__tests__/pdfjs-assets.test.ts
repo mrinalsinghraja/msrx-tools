@@ -105,3 +105,36 @@ describe("pdf.js rendering", () => {
     expect(LOADER).toMatch(/withTimeout\(/);
   });
 });
+
+describe("pdf.js documents", () => {
+  it("are only reachable through the scope that closes them", () => {
+    // pdf.js holds every parsed document in the worker until it is told to let
+    // go. Five ops opened one and walked away, and the live preview would have
+    // done it on every keystroke. Making `openDocument` private is what stops
+    // that coming back: there is no way to open one without the scope.
+    expect(LOADER).toMatch(/^async function openDocument/m);
+    expect(LOADER).not.toMatch(/^export async function openDocument/m);
+    expect(LOADER).toMatch(/export async function withDocument/);
+  });
+
+  it("close on the loading task, which is the call that actually frees them", () => {
+    // `PDFDocumentProxy` has a `cleanup()` that frees page resources and keeps
+    // the parsed document. Only the loading task's `destroy()` releases it, and
+    // the two are easy to confuse.
+    expect(LOADER).toMatch(/loadingTask\.destroy\(\)/);
+  });
+
+  it("are closed even when the work inside throws", () => {
+    // Several ops throw after opening — no extractable text, no matching terms.
+    // A close that only ran on the happy path would leak exactly when a person
+    // is retrying with different settings.
+    const scope = /export async function withDocument[\s\S]*?\n}/.exec(LOADER)?.[0] ?? "";
+    expect(scope).toMatch(/try\s*\{/);
+    expect(scope).toMatch(/finally\s*\{/);
+  });
+
+  it("leaves no op opening one on its own", () => {
+    const ops = readFileSync(join(ROOT, "src/lib/engines/pdf/render.ts"), "utf8");
+    expect(ops).not.toMatch(/await openDocument\(/);
+  });
+});

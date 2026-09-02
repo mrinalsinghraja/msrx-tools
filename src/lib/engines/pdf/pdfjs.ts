@@ -90,7 +90,7 @@ function withTimeout<T>(work: Promise<T>, name: string): Promise<T> {
   });
 }
 
-export async function openDocument(file: InputFile): Promise<PDFDocumentProxy> {
+async function openDocument(file: InputFile): Promise<PDFDocumentProxy> {
   const library = await getPdfJs();
   try {
     // pdf.js takes ownership of the buffer it is given and detaches it, so a
@@ -112,6 +112,43 @@ export async function openDocument(file: InputFile): Promise<PDFDocumentProxy> {
       throw new ToolError(`“${file.name}” is password-protected, so its pages can't be read.`);
     }
     throw new ToolError(`“${file.name}” couldn't be read: ${message}`);
+  }
+}
+
+/** A parsed document, for the callers that only need to name the type. */
+export type PdfDocument = PDFDocumentProxy;
+
+/**
+ * Opens a document, runs `work` over it, and always closes it again.
+ *
+ * This is the only way to get one: `openDocument` is deliberately private, so
+ * there is no version of this code that opens a document and forgets to close
+ * it.
+ *
+ * pdf.js keeps every document it has parsed alive inside the worker until it is
+ * told otherwise, so an op that opens one and walks away leaves it there for the
+ * life of the tab. One per conversion is not a crisis, but somebody working
+ * through a folder of files accumulates all of them, and the live preview would
+ * accumulate one per keystroke.
+ *
+ * The callback shape is the point: with a bare `openDocument` the cleanup is
+ * something each op has to remember, and five of them had already forgotten.
+ * Here there is nowhere to put the mistake.
+ */
+export async function withDocument<T>(
+  file: InputFile,
+  // Not named `use`: React has a hook by that name, and the lint rule that
+  // guards it cannot tell a callback parameter from a hook call.
+  work: (document: PDFDocumentProxy) => Promise<T>,
+): Promise<T> {
+  const document = await openDocument(file);
+  try {
+    return await work(document);
+  } finally {
+    // `destroy` lives on the loading task, not on the document — the document
+    // itself only offers `cleanup()`, which frees page resources and keeps the
+    // parsed file.
+    await document.loadingTask.destroy();
   }
 }
 
