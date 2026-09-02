@@ -14,7 +14,7 @@
 export type CategoryId =
   | "pdf"
   | "image"
-  | "media"
+  | "audio"
   | "file"
   | "text"
   | "dev"
@@ -26,11 +26,11 @@ export type EngineId =
   | "pure"
   | "image"
   | "pdf"
-  | "media"
   | "doc"
   | "archive"
   | "data"
-  | "crypto";
+  | "crypto"
+  | "audio";
 
 /**
  * The shape of the tool's workspace.
@@ -199,6 +199,15 @@ export interface ToolSpec {
      */
     preview?: boolean;
   };
+  /**
+   * Offer a microphone button alongside the file picker.
+   *
+   * A recording is just another way of getting a file into the workspace, so it
+   * arrives as one and everything downstream is unchanged. The alternative — a
+   * separate recording workspace — would have duplicated the whole file list,
+   * options panel and result tray for one button.
+   */
+  record?: boolean;
   /** Sibling slugs. Drives the internal link matrix and the "related tools" rail. */
   related: string[];
   /** lucide-react icon name, e.g. "FileText". */

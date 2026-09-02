@@ -20,13 +20,13 @@ export const CATEGORIES: Category[] = [
       "Resize, crop, compress and convert using the browser's own image engine — no plugin, no upload, and fast enough that a batch finishes before a competitor's page has loaded.",
   },
   {
-    id: "media",
-    slug: "video",
-    title: "Video & Audio",
-    short: "Convert, trim, extract, compress",
-    icon: "Clapperboard",
+    id: "audio",
+    slug: "audio",
+    title: "Audio",
+    short: "Trim, level, speed, pitch, join",
+    icon: "AudioLines",
     blurb:
-      "A full FFmpeg build running in the tab. Convert formats, cut clips, pull the audio out, make a GIF — on files that never touch a server.",
+      "Cut, level, stretch and join recordings using the browser's own audio engine — no plugin and no thirty-megabyte download before the first click.",
   },
   {
     id: "file",

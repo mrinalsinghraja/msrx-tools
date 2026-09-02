@@ -150,7 +150,10 @@ for (const [slug, entry] of entries) {
   // Slugs are spelled the way people search, which is American. The prose is
   // British. Fold the difference rather than making the house voice lose to
   // the keyword.
-  const fold = (text) => text.toLowerCase().replace(/is(e|ed|es|ing|ation)\b/g, "iz$1");
+  // -ise/-ize, and the nouns built on them: "equaliser" and "equalizer" are one
+  // word, and a page should not be accused of ducking its own subject over a
+  // spelling convention.
+  const fold = (text) => text.toLowerCase().replace(/is(e|ed|es|er|ers|ing|ation)\b/g, "iz$1");
   const haystack = fold(`${entry.intro} ${entry.steps.join(" ")} ${entry.faq.map((f) => f[1]).join(" ")}`);
   const missing = terms.filter((term) => !haystack.includes(fold(term).slice(0, Math.max(4, term.length - 2))));
   if (missing.length) {

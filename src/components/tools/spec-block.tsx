@@ -18,11 +18,11 @@ const ENGINE_NOTE: Record<ToolSpec["engine"], string> = {
   pure: "This tab",
   pdf: "This tab · PDF engine",
   image: "This tab · image engine",
-  media: "This tab · media engine",
   doc: "This tab · document engine",
   archive: "This tab · archive engine",
   data: "This tab · data engine",
   crypto: "This tab · WebCrypto",
+  audio: "This tab · audio engine",
 };
 
 function extList(exts: string[]) {

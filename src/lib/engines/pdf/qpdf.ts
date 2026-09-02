@@ -170,15 +170,23 @@ export async function runQpdf(args: string[], input: Uint8Array): Promise<QpdfRu
 }
 
 /**
- * qpdf prefixes its messages with the name it was invoked as, which here is an
- * Emscripten placeholder like "./this.program". Showing that to someone who
- * dropped a file on a web page would be nonsense, so it comes off.
+ * Tidies qpdf's messages for someone who dropped a file on a web page.
+ *
+ * Two things come off. The program name it was invoked as, which under
+ * Emscripten is a placeholder like "./this.program". And the path of the file
+ * inside the virtual filesystem — "/in.pdf" means nothing to a person who gave
+ * us a document called something else, and printing it leaks an implementation
+ * detail into an error message for no benefit.
  */
 function cleanOutput(charCodes: number[]): string {
   const text = charCodes.map((code) => String.fromCharCode(code)).join("");
   return text
     .split("\n")
-    .map((line) => line.replace(/^[^\s:]*(?:qpdf|program|\.js):\s*/i, ""))
+    .map((line) =>
+      line
+        .replace(/^[^\s:]*(?:qpdf|program|\.js):\s*/i, "")
+        .replace(/^\/(?:in|out)\.pdf(?:\s*\(\S+\))?:\s*/, ""),
+    )
     .join("\n")
     .trim();
 }

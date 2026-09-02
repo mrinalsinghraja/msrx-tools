@@ -115,6 +115,20 @@ describe("unlockPdf", () => {
   });
 });
 
+describe("qpdf messages", () => {
+  it("do not leak the virtual filesystem path into what the user reads", async () => {
+    // qpdf names the file it was given, which is "/in.pdf" inside the sandbox
+    // and not what the person dropped. Reporting that would be confusing and
+    // would expose an implementation detail for no benefit.
+    const broken = new TextEncoder().encode("%PDF-1.4\nnot really a pdf\n");
+    const run = await runQpdf(["{INPUT}", "--show-encryption"], broken);
+
+    expect(run.code).not.toBe(0);
+    expect(run.output).not.toMatch(/in\.pdf/);
+    expect(run.output.length).toBeGreaterThan(0);
+  });
+});
+
 describe("protectPdf", () => {
   it("writes a document that cannot be opened without the password", async () => {
     const result = await protectPdf(asFile("notes.pdf", plain), { password: "hunter2" });

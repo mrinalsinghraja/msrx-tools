@@ -51,6 +51,7 @@ export async function runFileTool(
     image: async () => (await import("./image")).getImageOp,
     archive: async () => (await import("./archive")).getArchiveOp,
     crypto: async () => (await import("./crypto")).getCryptoOp,
+    audio: async () => (await import("./audio")).getAudioOp,
   };
 
   const load = loaders[tool.engine];

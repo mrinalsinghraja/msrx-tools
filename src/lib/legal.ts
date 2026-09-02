@@ -162,6 +162,13 @@ export function termsOfUse(contactEmail: string): LegalDocument {
         ],
       },
       {
+        heading: "Open source components",
+        paragraphs: [
+          "These tools are built on other people's work, running in your browser: pdf-lib and pdf.js for documents, qpdf for PDF encryption, LAME for MP3, fflate for archives. Their licences and versions are listed in docs/licences.md in the source repository.",
+          "One of them is copyleft and is worth naming here rather than in a file nobody opens. MP3 encoding uses LAME under the LGPL-3.0, unmodified and loaded as a whole. You are entitled to replace it with your own build of that library; it is imported in one place, and the licence text ships inside the package.",
+        ],
+      },
+      {
         heading: "Questions",
         paragraphs: [`Anything unclear here, write to ${contactEmail}.`],
       },
