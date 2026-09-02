@@ -4,6 +4,8 @@
 
 Nothing is uploaded. There is no account, no quota, no paid tier. Open the site in a private window and every tool works.
 
+![MSRX Tools — every file tool you need, none of them upload your files](docs/screenshot.png)
+
 ## Why it's built this way
 
 Most "free online tools" are upload forms. Your file goes to someone's server, gets processed, and you take their word for what happened to it afterwards. That is a bad trade for a file you only wanted to rename.
@@ -29,6 +31,10 @@ So the constraint here is architectural, not a promise: the work happens in the 
 Every tool is one `ToolSpec` in `src/lib/tools/catalog/` and one content entry beside it. The registry in `src/lib/tools/registry.ts` is the single source of truth — routing, navigation, search, the sitemap, the internal link matrix and the smoke tests all read from it. Adding a tool means adding data, not wiring.
 
 Execution is separated from description. A `ToolSpec` names an engine and an operation; the engines in `src/lib/engines/` (`pdf`, `image`, `archive`, `crypto`, `pure`) do the work and know nothing about pages or routing.
+
+Every tool page renders its specification straight from that data — what it accepts, what it returns, where it runs, and what it uploads:
+
+![The Merge PDF tool, with a specification panel reading "Uploads: None — there is no server to send it to"](docs/screenshot-tool.png)
 
 Two build gates worth knowing about:
 
