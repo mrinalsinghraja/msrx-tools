@@ -39,6 +39,15 @@ export interface AiField {
    * marked against them. Leave them out to show the count alone.
    */
   lineMetric?: { min?: number; max?: number };
+  /**
+   * Run the finished answer against the browser's own engine and report where
+   * it contradicts itself.
+   *
+   * Same reason as `lineMetric`: the model is being asked to state the result
+   * of running a program, which it cannot do reliably and did get wrong. The
+   * page can run it exactly.
+   */
+  verify?: "regex";
 }
 
 export const AI_FIELDS: Record<string, AiField> = {
@@ -164,6 +173,7 @@ export const AI_FIELDS: Record<string, AiField> = {
     format: "csv",
   },
   "regex-generator": {
+    verify: "regex",
     maxChars: 4000,
     inputLabel: "What should it match?",
     placeholder: "An Indian mobile number, optionally with +91 or 0 in front, with or without a space or dash after the country code",

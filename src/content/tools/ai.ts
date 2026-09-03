@@ -713,6 +713,10 @@ Then test it. There is a regex tester on this site that runs entirely on your ow
         a: "No, and that is true of hand-written ones too. A pattern that matches every example you thought of can still match things you did not, and validation bugs almost always take that shape. The tester on this site runs on your own machine and takes a minute.",
       },
       {
+        q: "Are the example strings verified?",
+        a: "Yes, by your browser rather than by the model. Every string in the two lists is run against the generated expression using the engine already in this tab, and anything that behaves differently from its label is reported to you as a contradiction. This exists because it caught one: an early answer here filed a valid postcode under the strings it rejects. What the check proves is narrow but real — that the expression and its own examples agree. It cannot tell you the expression is the one you meant to ask for, and it stays quiet on flavours whose syntax this engine would misread, such as POSIX bracket expressions.",
+      },
+      {
         q: "Why does the Go option sometimes refuse part of my description?",
         a: "Because Go's regexp package implements RE2, which deliberately omits backreferences and lookaround to guarantee that matching cannot blow up on a crafted input. That is a real trade-off rather than a missing feature, so the honest answer is to say the expression cannot be written there, and give the nearest one that can.",
       },

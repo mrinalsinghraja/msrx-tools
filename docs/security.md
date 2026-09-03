@@ -107,6 +107,19 @@ material would instead mean refusing to proofread an article about prompt
 injection. The fence is the defence, and it is structural rather than
 probabilistic.
 
+**Model output that asserts a computed fact is checked by the page.** Two
+places so far, both found by running the tools in a browser rather than by
+reading the prompts. The meta description tool was asked to count characters and
+could not; `AiField.lineMetric` now measures each line here. The regex tool
+listed a valid UK postcode among the strings its own expression rejects;
+`lib/ai/verify-regex.ts` now runs every example against the generated pattern
+with the browser's own engine and reports any disagreement. The rule this
+established: **if a model is being asked to state the result of running
+something, run it instead.** The check declines rather than guesses when the
+target flavour is one JavaScript would misread — POSIX bracket expressions, or a
+`\A` anchor that JavaScript reads as the letter A — because a confidently wrong
+contradiction is worse than none.
+
 **No AI tool accepts a file.** That is what lets the site go on saying, of all
 171 tools without an asterisk, that your files never leave your device. It is
 enforced by a test in `lib/__tests__/legal.test.ts`, which reads the registry

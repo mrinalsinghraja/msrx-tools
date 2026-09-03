@@ -7,6 +7,7 @@ import { OptionsPanel } from "@/components/tools/options-panel";
 import { ResultPanel } from "@/components/tools/result-panel";
 import { Button, Notice, Textarea } from "@/components/ui/primitives";
 import { aiField } from "@/lib/ai/fields";
+import { checkRegexAnswer, describeRegexCheck } from "@/lib/ai/verify-regex";
 import { defaultOptions } from "@/lib/engines/run";
 import type { OpResult, OpStat } from "@/lib/engines/types";
 import type { OptionValue, OptionValues, ToolSpec } from "@/lib/tools/types";
@@ -141,6 +142,13 @@ export function AiWorkspace({ tool }: { tool: ToolSpec }) {
   // The result panel takes a finished op result, so the partial stream is
   // dressed as one. Everything it gives us — copy, download, the note — then
   // works on a half-written answer exactly as it does on a complete one.
+  // Only once the answer is complete: half an expression would fail to compile
+  // and half an example list would look like a contradiction.
+  const selfCheck = useMemo(() => {
+    if (busy || !output || field?.verify !== "regex") return null;
+    return describeRegexCheck(checkRegexAnswer(output, String(options.flavour ?? "javascript")));
+  }, [busy, output, field, options.flavour]);
+
   const result: OpResult | null = useMemo(() => {
     if (!output) return null;
     return {
@@ -220,6 +228,12 @@ export function AiWorkspace({ tool }: { tool: ToolSpec }) {
             ran ? "Nothing came back. Run it again." : `Press ${field?.runLabel ?? "the button"} and the answer is written here.`
           }
         />
+
+        {selfCheck ? (
+          <div className="-mt-3">
+            <Notice tone={selfCheck.tone}>{selfCheck.text}</Notice>
+          </div>
+        ) : null}
 
         {busy && !output ? (
           <p className="-mt-3 text-[13px] text-graphite-faint" aria-live="polite">

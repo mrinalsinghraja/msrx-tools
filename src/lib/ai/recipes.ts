@@ -797,7 +797,7 @@ Then, on a new line, state whether it is anchored, and whether it is meant to va
 
 Prefer a readable expression to a clever one. Use character classes over long alternations, avoid nested quantifiers that can backtrack catastrophically, and if the description is better served by two simple expressions than one dense one, say that.
 ${explain ? "\nThen a blank line, the line HOW IT WORKS, and a breakdown: one line per component of the expression, in the order they appear." : ""}
-${examples ? "\nThen a blank line, the line MATCHES, and three or four example strings it matches; then the line DOES NOT MATCH, and three or four near-misses it rejects. Choose near-misses that a careless expression would wrongly accept." : ""}`;
+${examples ? "\nThen a blank line, the line MATCHES, and three or four example strings it matches; then the line DOES NOT MATCH, and three or four near-misses it rejects. Choose near-misses that a careless expression would wrongly accept.\n\nEvery example you list is then run against your expression by the page itself, and any that behaves differently from your label is shown to the visitor as a contradiction. So work each one through against the expression you actually wrote, character by character, before you list it. A near-miss that your expression happens to accept belongs under MATCHES, or the expression needs changing." : ""}`;
     },
   },
 
