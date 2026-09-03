@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import {
   brokerage,
+  homeLoanEmi,
   cagr,
   computeTax,
   emiFor,
@@ -356,6 +360,30 @@ describe("borrowing", () => {
     expect(() =>
       loanPrepayment("", { principal: 100000, rate: 9, years: 5, lump: 0, after: 12, extra: 0, keep: "tenure" }),
     ).toThrow(ToolError);
+  });
+
+  it("says in prose what the home loan tool actually prints about year one", () => {
+    // This page claimed "something like ninety-five per cent" until a browser
+    // sweep read its own default output and found 80.9%. A page contradicted by
+    // the tool sitting above it is worse than a page with no figure at all, so
+    // the claim is pinned to the arithmetic here.
+    const share = (years: number) => {
+      const result = homeLoanEmi("", { price: 8000000, down: 20, rate: 8.5, years, schedule: false });
+      const interest = figure(result.output, "First year interest");
+      const principal = figure(result.output, "First year principal");
+      return (interest / (interest + principal)) * 100;
+    };
+
+    expect(share(20)).toBeGreaterThan(78);
+    expect(share(20)).toBeLessThan(82);
+    expect(share(30)).toBeGreaterThan(90);
+    expect(share(30)).toBeLessThan(95);
+
+    const prose = readFileSync(join(process.cwd(), "src/content/tools/finance.ts"), "utf8");
+    const intro = prose.slice(prose.indexOf('"home-loan-emi-calculator"'));
+    expect(intro).toContain("roughly four-fifths");
+    expect(intro).toContain("passes ninety per cent");
+    expect(intro).not.toContain("ninety-five per cent");
   });
 
   it("sizes eligibility from the instalment the income can carry", () => {
