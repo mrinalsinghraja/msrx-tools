@@ -1,8 +1,10 @@
 # MSRX Tools
 
-**[tools.msrx.co.in](https://tools.msrx.co.in)** — 116 file, image, PDF and text tools that run entirely in your browser.
+**[tools.msrx.co.in](https://tools.msrx.co.in)** — 211 tools for files, images, video, audio, text, money and code. Almost all of them run entirely in your browser.
 
-Nothing is uploaded. There is no account, no quota, no paid tier. Open the site in a private window and every tool works.
+No account, no quota, no paid tier. Open the site in a private window and every tool works.
+
+**No file is ever uploaded.** Every tool that touches a file — PDF, image, video, audio, archive, encryption — reads it on your device and never transmits it. The 24 AI writing tools are the one exception, and they say so on their own pages: they take typed text, never a file, and send that text to a model. Everything else keeps working with the network off.
 
 ![Compressing a 2.53 MB photo down to 1.17 MB — the whole operation runs in the tab, nothing is uploaded](docs/demo.gif)
 
@@ -14,20 +16,24 @@ Nothing is uploaded. There is no account, no quota, no paid tier. Open the site 
 
 Most "free online tools" are upload forms. Your file goes to someone's server, gets processed, and you take their word for what happened to it afterwards. That is a bad trade for a file you only wanted to rename.
 
-So the constraint here is architectural, not a promise: the work happens in the page. PDFs go through `pdf-lib` and `pdfjs-dist`, archives through `fflate` (plain JavaScript deflate, not WASM, so it works on a phone and offline), encryption through the Web Crypto API. There is no upload endpoint to trust because there is no upload endpoint.
+So for anything file-shaped the constraint is architectural, not a promise: the work happens in the page. PDFs go through `pdf-lib` and `pdfjs-dist`, archives through `fflate` (plain JavaScript deflate, not WASM, so it works on a phone and offline), video and audio through the codecs the browser already ships, encryption through the Web Crypto API. There is no endpoint to send a file to, because none exists.
 
 ## What's in it
 
-116 tools across seven categories, counted from the registry rather than typed into this sentence:
+211 tools across 11 categories, counted from the registry rather than typed into this sentence:
 
 | Category | Tools |
 |---|---|
+| Financial | 34 |
+| Text | 30 |
 | Developer | 28 |
-| Text | 20 |
+| AI writing | 24 |
+| Video | 21 |
+| PDF | 19 |
 | Security | 18 |
-| PDF | 17 |
 | Image | 15 |
-| Calculators | 15 |
+| Calculators | 11 |
+| Audio | 8 |
 | Files & archives | 3 |
 
 ## How it's structured
@@ -49,7 +55,7 @@ Two build gates worth knowing about:
 
 Next.js 16 · React 19 · TypeScript · Tailwind v4 · Radix UI · Zustand · pdf-lib · pdfjs-dist · fflate · Web Crypto
 
-The optional per-tool AI assistant calls Groq. Its key is server-side only and never reaches the browser; every tool works with the assistant switched off.
+The AI writing tools and the optional per-tool assistant call Groq. The key is server-side only and never reaches the browser; every file tool works with the assistant switched off, and offline.
 
 ## Running it
 
