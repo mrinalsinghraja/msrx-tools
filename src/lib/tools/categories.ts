@@ -83,6 +83,15 @@ export const CATEGORIES: Category[] = [
       "Checksums, strong passwords, QR codes and metadata scrubbing. Nothing here phones home, which is rather the point for this category.",
   },
   {
+    id: "finance",
+    slug: "finance",
+    title: "Financial Calculators",
+    short: "SIP, EMI, tax, PPF, retirement",
+    icon: "IndianRupee",
+    blurb:
+      "Investments, loans, salary, tax and the small-savings schemes — worked out in full, with the schedule behind every figure rather than a single number and a chart. Nothing is uploaded and no rate is fetched: the numbers you type are the only numbers involved.",
+  },
+  {
     id: "calc",
     slug: "calculator",
     title: "Calculators & Generators",

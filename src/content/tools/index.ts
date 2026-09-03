@@ -5,6 +5,7 @@ import { AUDIO_CONTENT } from "./audio";
 import { CALC_CONTENT } from "./calc";
 import { DEV_CONTENT } from "./dev";
 import { FILE_CONTENT } from "./file";
+import { FINANCE_CONTENT } from "./finance";
 import { IMAGE_CONTENT } from "./image";
 import { PDF_CONTENT } from "./pdf";
 import { SECURITY_CONTENT } from "./security";
@@ -28,6 +29,7 @@ export const TOOL_CONTENT: Record<string, ToolContent> = {
   ...IMAGE_CONTENT,
   ...VIDEO_CONTENT,
   ...AUDIO_CONTENT,
+  ...FINANCE_CONTENT,
   ...CALC_CONTENT,
   ...PDF_CONTENT,
 };

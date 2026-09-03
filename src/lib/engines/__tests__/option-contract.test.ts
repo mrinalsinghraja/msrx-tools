@@ -51,6 +51,8 @@ const INPUT: Record<string, string> = {
   "json-to-typescript": '{"id":1,"name":"Ada","tags":["x"],"meta":{"ok":true}}',
   "json-to-go": '{"id":1,"name":"Ada","tags":["x"]}',
   "json-path-finder": '{"a":{"b":[{"c":1}]}}',
+  "xirr-calculator": "2022-04-01, -100000\n2023-04-01, -50000\n2025-09-01, 210000",
+  "stock-average-calculator": "50, 240.75\n30, 198.20\n120, 176.40",
   "unix-timestamp-converter": "1516239022",
   "cron-expression-parser": "*/5 9-17 * * 1-5",
   "jwt-decoder":

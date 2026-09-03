@@ -20,6 +20,7 @@ export type CategoryId =
   | "dev"
   | "security"
   | "calc"
+  | "finance"
   | "video"
   | "ai";
 

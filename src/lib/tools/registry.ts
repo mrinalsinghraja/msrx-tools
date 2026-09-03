@@ -4,6 +4,7 @@ import { AUDIO_TOOLS } from "./catalog/audio";
 import { CALC_TOOLS } from "./catalog/calc";
 import { DEV_TOOLS } from "./catalog/dev";
 import { FILE_TOOLS } from "./catalog/file";
+import { FINANCE_TOOLS } from "./catalog/finance";
 import { IMAGE_TOOLS } from "./catalog/image";
 import { PDF_TOOLS } from "./catalog/pdf";
 import { SECURITY_TOOLS } from "./catalog/security";
@@ -28,6 +29,7 @@ export const TOOLS: ToolSpec[] = [
   ...AI_TOOLS,
   ...DEV_TOOLS,
   ...SECURITY_TOOLS,
+  ...FINANCE_TOOLS,
   ...CALC_TOOLS,
 ];
 
