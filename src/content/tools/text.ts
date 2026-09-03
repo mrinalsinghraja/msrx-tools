@@ -722,4 +722,366 @@ Dotted keys behave the same way: a key written as owner.name creates a nested ob
       },
     ],
   },
+
+  "fancy-text-generator": {
+    intro: `The thing worth understanding before you use any of these is that no font is involved. Nothing here is being styled, formatted or rendered differently. Each letter is replaced by an entirely separate character that happens to have been drawn to look like a bold or italic version of it. Unicode encoded those characters for mathematics, where weight and shape carry meaning — a bold R means the real numbers, and it is a different symbol from an italic R, not the same symbol wearing a different coat.
+
+That is why the result survives being pasted into a bio, a display name or a message box that has no formatting controls at all. You are not applying bold; you are typing different letters. The platform has nothing to strip.
+
+This page is the fancy text generator that shows all thirty of them at once, from the six mathematical alphabets through circled and squared letters, fullwidth forms, small capitals, superscripts, and the combining marks that draw a line through a word. Each row has its own copy button, because in practice you want one of the thirty and you want it on the clipboard.
+
+Two limitations come with the trick and both are worth knowing before you commit. A screen reader does not treat these as letters: depending on the software and its settings it will announce each one by its formal name, or pass over the whole run in silence, so a sentence written this way is not readable to a blind person. And because they are different codepoints, searching for an ordinary word will not find the styled version of it. Use them for a flourish. Do not use them for anything somebody has to read or find.`,
+    steps: [
+      "Type or paste your text at the top. Every style updates as you type.",
+      "Narrow the list with the Show option if you only want the bold or the bubble variants.",
+      "Find the row you like and press Copy on that row.",
+      "Paste it wherever you need it — a bio, a display name, a message, a spreadsheet cell.",
+      "Read the note underneath if some letters came through unchanged; it names which style dropped them and why.",
+    ],
+    faq: [
+      {
+        q: "Will this work on Instagram, LinkedIn or WhatsApp?",
+        a: "Yes, because there is nothing for them to strip. The characters are ordinary Unicode, the same as an accented letter or an emoji, so they travel through any field that accepts text. What varies is whether the device at the other end has a glyph for them. The mathematical alphabets are very widely supported; the filled squares and circles are the ones most likely to appear as an empty box on an older phone.",
+      },
+      {
+        q: "Why do my numbers stay plain in some styles?",
+        a: "Because those alphabets have no digits. Unicode gave bold, sans-serif, double-struck and monospace a full set of ten, and gave italic, script and Fraktur none at all. There is no italic seven to substitute, so the ordinary one is left in place rather than replaced by something misleading.",
+      },
+      {
+        q: "Is this safe to use in a password or a username?",
+        a: "In a password, no — many systems normalise or reject characters outside the ordinary range, and you may lock yourself out of an account you can no longer type the password for. Usernames vary: some platforms allow them, some silently strip them, some reject the sign-up. Display names are the safe place for this.",
+      },
+      {
+        q: "Does it work offline?",
+        a: "Entirely. The substitution tables are part of the page, so once it has loaded there is no further request. Disconnect and it keeps working, which is the same for every tool on this site outside the AI section.",
+      },
+    ],
+  },
+
+  "bold-text-generator": {
+    intro: `Most places you would like to write something in bold will not let you. A LinkedIn post, an Instagram caption, a WhatsApp status, a Google review, a spreadsheet cell, a form field — all plain text, all indifferent to whatever formatting you had in your clipboard. The usual workaround is to shout in capitals, which reads as anger rather than emphasis.
+
+Substituting characters gets round it. This page offers six alphabets that look bold: sans-serif and serif, each with an italic partner, plus a heavy script and a heavy blackletter. Sans-serif bold is the one to reach for by default. It is the closest match to the interface fonts that social platforms actually use, so a phrase in it sits inside your sentence rather than looking like it was pasted from somewhere else, and it is the most widely supported of the six.
+
+Two of the six carry no digits. Unicode gave a full set of bold numerals to the serif and sans-serif alphabets and none to the bold italics, so a year or a price will stay in ordinary type in those rows. The tool tells you when that has happened rather than letting you discover it after posting.
+
+Restraint matters more here than with any of the other styles on this site, for a reason that has nothing to do with taste. Every one of these characters is announced by a screen reader as a mathematical symbol, or skipped completely. A heading of three emphasised words is a small courtesy problem. A whole paragraph is unreadable to somebody using one, and search will not match a single word of it either.`,
+    steps: [
+      "Put your phrase in the box — a few words rather than a paragraph gives the best result.",
+      "Compare the six rows. Sans-serif bold sits most naturally inside ordinary social media text.",
+      "Press Copy on the row you want.",
+      "Paste it into the caption, bio or post. No formatting button is involved at any point.",
+      "Check the note if a number stayed plain: the bold italic alphabets genuinely have no digits.",
+    ],
+    faq: [
+      {
+        q: "Why does LinkedIn strip my formatting but keep this?",
+        a: "Because it never sees formatting. The post box accepts plain text and discards style information, which is why pasting from a word processor loses everything. These characters are not style information — they are the text itself, so there is nothing to discard.",
+      },
+      {
+        q: "Which of the six should I pick?",
+        a: "Sans-serif bold, unless you have a specific reason not to. It matches the typefaces most apps render their own interface in, so the emphasised words look like part of the sentence. Serif bold reads as more formal and slightly out of place on a phone. The script and blackletter versions are decorative rather than emphatic.",
+      },
+      {
+        q: "Will everyone see it the same way?",
+        a: "Nearly. These come from the Mathematical Alphanumeric Symbols block, which has been supported across Windows, macOS, Android and iOS for many years. A very old device may show empty rectangles, and some apps substitute a fallback face that makes the bold look thinner than intended.",
+      },
+      {
+        q: "Can I use it in an email subject line?",
+        a: "You can, and it is worth thinking twice. Subject lines are heavily weighted by spam filters, and unusual character ranges are one of the signals they look at. It will also break the recipient's ability to search their inbox for the words in it.",
+      },
+    ],
+  },
+
+  "italic-text-generator": {
+    intro: `Italics do quieter work than bold. They mark a title, a foreign phrase, a word being mentioned rather than used, or a small shift in emphasis that would be shouting if you set it heavier. Losing that distinction is one of the real costs of writing in boxes that accept no formatting, and it is why substituting characters is worth doing even though the results are imperfect.
+
+Four alphabets are offered here: an upright-serif italic and a sans-serif italic, and the bold partner of each. The serif version has the more traditional letterforms and reads as a book italic. The sans version is closer to what a phone renders its own interface in, so it blends better into a caption.
+
+There is one famous hole. Mathematical italic small h does not exist in the block where the rest of the alphabet lives, because the character was already encoded years earlier as the Planck constant. The substitution table patches that gap by reaching for the older symbol, so a word with an h in it comes out complete rather than with a plain letter sitting in the middle of it. Every alphabet on this site has gaps of that kind mapped explicitly, since a missing letter only shows up on the one word nobody thought to test.
+
+None of these alphabets has digits. Unicode never encoded an italic three, so any number in your text stays upright. That is stated in the result rather than left for you to notice afterwards.
+
+As with every style of this kind, assistive software does not read the output as words, and a search for the plain spelling will not find it.`,
+    steps: [
+      "Enter the phrase you want slanted.",
+      "Choose between serif and sans-serif; sans blends into most app interfaces, serif looks more like print.",
+      "Copy the row you want using the button beside it.",
+      "Paste it where italics are not otherwise available — a bio, a caption, a chat message.",
+      "Expect numbers to stay upright. There is no italic digit in Unicode to swap them for.",
+    ],
+    faq: [
+      {
+        q: "Why is the letter h sometimes different from the rest?",
+        a: "It is borrowed from elsewhere. When the mathematical alphabets were added, italic small h had already been encoded on its own as the symbol for the Planck constant, so the block skipped it. This tool substitutes that older character, which is the standard practice and looks correct in almost every typeface.",
+      },
+      {
+        q: "Can I combine slanted and heavy in one word?",
+        a: "Yes — the bold italic rows are exactly that, and they are single characters rather than two effects stacked. What you cannot do is apply one of these to text that is already substituted, since the result is no longer an ordinary letter for the table to match.",
+      },
+      {
+        q: "Does it support accented letters?",
+        a: "No, and nothing does. The mathematical alphabets contain the twenty-six unaccented English letters and nothing else, so an é or an ñ passes through unchanged. Text in a language that uses accents will come out looking mixed.",
+      },
+      {
+        q: "Is there a way to make real italics instead?",
+        a: "Only where the platform gives you a control for it. Some apps, including WhatsApp and Telegram, support their own markup for emphasis and will render it properly for screen readers too. Where such a feature exists, use it in preference to this.",
+      },
+    ],
+  },
+
+  "cursive-text-generator": {
+    intro: `Two quite different traditions get called cursive when people search for them, and this page produces both. Script is the flowing, connected, copperplate-looking alphabet — the one used for a signature or an invitation. Fraktur, also called blackletter or Gothic, is the dense angular alphabet of German printing before the middle of the twentieth century, and of a great many band logos since. They look nothing alike and are wanted for opposite reasons, so both appear here alongside their heavier variants.
+
+The script alphabet is the most heavily patched set on this site. When Unicode encoded the mathematical alphabets, eleven script letters had already been given their own codepoints years earlier for use in specific formulas, so they were skipped rather than duplicated. Script capital B, E, F, H, I, L, M and R all live in a different block from their neighbours, as do lowercase e, g and o. Fraktur lost five capitals the same way. Every one of those is mapped here, which is why a word like Mrinal comes out whole instead of dropping its first letter.
+
+Neither alphabet carries digits. There is no script four, so numbers stay as they are.
+
+Blackletter comes with a caution that has nothing to do with technology. The typeface has a specific and unpleasant political association in twentieth-century Germany, and it reads very differently to a German audience than it does to an English-speaking one. It is used entirely innocently on album covers and tattoo flash; it is worth knowing the context exists.`,
+    steps: [
+      "Type the word or name you want set decoratively.",
+      "Pick script for a flowing signature look, or Fraktur for the angular blackletter one.",
+      "Use the bold rows if the plain versions look too faint at small sizes on a phone.",
+      "Copy the row you want and paste it wherever you need it.",
+      "Read it back at the size it will actually appear; both alphabets get hard to read quickly.",
+    ],
+    faq: [
+      {
+        q: "Why do a few letters look different from the rest of the word?",
+        a: "They come from a different part of Unicode. Eleven script letters and five Fraktur capitals were encoded separately, before the alphabets they belong to existed, so their designs were drawn at a different time. This tool uses them because the alternative is a gap, but in some typefaces the mismatch in weight is visible.",
+      },
+      {
+        q: "Is this the same as a handwriting font?",
+        a: "No. A font is a set of drawings applied to ordinary letters, and it lives on the device rendering the text. This is a set of separate characters, so it travels with the text itself. That is why it survives a paste into a plain-text field and a real handwriting font does not.",
+      },
+      {
+        q: "Can I use it for a tattoo or a printed design?",
+        a: "For a design, work with a real typeface instead. A designer can use an actual blackletter or script font at any size with proper spacing and ligatures. These characters exist to solve the problem of plain-text fields, and their letterforms were drawn for mathematical notation rather than display.",
+      },
+      {
+        q: "Why is it sometimes called Gothic?",
+        a: "Because blackletter is what the word Gothic originally described in typography, long before it meant a sans-serif face or a musical genre. The name persists in font menus and causes constant confusion with the unrelated modern sans-serifs also called Gothic.",
+      },
+    ],
+  },
+
+  "small-caps-generator": {
+    intro: `In real typography, small capitals are a separate set of letterforms cut to the height of a lowercase x, with the proportions adjusted so they do not look like shrunken capitals. They are used for abbreviations inside running text, for the opening words of a chapter, and for names in some academic styles. A proper typeface either contains them or it does not.
+
+What this page produces is a different thing wearing the same name, and it is worth being straight about that. The characters here are borrowed from the International Phonetic Alphabet extensions, where they were encoded to represent particular speech sounds rather than to be a typographic style. They happen to be drawn as small capitals, so they serve the purpose.
+
+Two letters are missing entirely. Unicode never encoded a small-capital Q or a small-capital X in that range, because no phonetic transcription needed them. Nothing can be substituted without changing the letter, so those two come through as ordinary lowercase and the result says so. A word containing either will look uneven, which is a real limitation rather than something to work around.
+
+Monospace and double-struck alphabets are offered alongside, since they are wanted for similar reasons — a name that needs to look deliberate in a field with no formatting. Monospace has the full set of letters and digits and is the most reliably supported alphabet in this whole family.
+
+The usual caveats apply: assistive software does not read any of it as text, and no search will match it.`,
+    steps: [
+      "Type the words you want set in small capitals.",
+      "Look at the result for a Q or an X — those two letters have no small-capital form and stay lowercase.",
+      "Try the monospace row if you need digits as well as letters; small caps covers letters only.",
+      "Copy the row you want with the button beside it.",
+      "Keep it to short runs. It gets hard to read at paragraph length.",
+    ],
+    faq: [
+      {
+        q: "Why are Q and X not converted?",
+        a: "Because those characters do not exist. The small capitals in Unicode come from a phonetic alphabet that had no use for them, so they were never encoded. Substituting a lookalike from another script would change what the text says, and dropping the letter would change the word, so it is left as it is and flagged.",
+      },
+      {
+        q: "How is this different from just typing in capitals?",
+        a: "Full capitals read as shouting and are measurably slower to read, because word shapes disappear. Small capitals keep the text quiet while still marking it as distinct. That said, a screen reader gets nothing useful from either version of this trick.",
+      },
+      {
+        q: "Are these the same as the small caps in a word processor?",
+        a: "No. A word processor applies a real typographic feature from the font, which produces properly proportioned letterforms and stays searchable and readable to assistive software. This is a substitution for places that have no such feature at all.",
+      },
+      {
+        q: "Which of the three is best supported?",
+        a: "Monospace, comfortably. It is a complete alphabet with digits, it comes from the mathematical block that has been supported everywhere for years, and it degrades gracefully. The small capitals themselves are widely but less uniformly supported on older Android devices.",
+      },
+    ],
+  },
+
+  "strikethrough-text-generator": {
+    intro: `Everything else in this family swaps one letter for a different letter. This tool does something mechanically unrelated, and the difference explains most of its quirks.
+
+A strikethrough here is not a formatting toggle. A combining mark is a character with no width of its own. It attaches to whatever precedes it and draws on top of it, which is how Unicode builds accented letters out of parts. The long stroke overlay is one of those marks, so putting it after every character in a phrase produces a continuous line through the whole thing. The same approach gives an underline, a diagonal slash, and a bar across the top.
+
+Because the mark is applied per character, including the spaces, the line runs unbroken between words rather than stopping at each gap. That is what makes it read as a struck-out sentence instead of a row of struck-out words.
+
+The consequences of it being a separate character are worth knowing. Your text doubles in length, since every visible letter is now two codepoints, which matters where a limit is counted in characters rather than in what you can see. Moving the cursor through it takes two presses per letter in some editors, and a single backspace may remove the line rather than the letter. And a few older renderers place the stroke badly, leaving it floating above or below where it should sit.
+
+Screen readers ignore the marks entirely, so a struck-out passage is announced as though it were ordinary text — which means a reader relying on one has no idea you crossed it out. If the deletion carries meaning, say so in words as well.`,
+    steps: [
+      "Type or paste the passage you want crossed out.",
+      "Choose a row: a line through the middle, an underline, a diagonal slash, or a bar across the top.",
+      "Copy that row with the button beside it.",
+      "Paste it anywhere plain text is accepted — a chat, a comment, a spreadsheet.",
+      "Remember the character count roughly doubles, which matters against a posting limit.",
+    ],
+    faq: [
+      {
+        q: "Why is my text twice as long as it looks?",
+        a: "Because each visible character is now two: the letter, and the invisible mark drawn over it. Anything counting characters — a post limit, a database column, a form validator — counts both. Ten visible letters will be measured as twenty.",
+      },
+      {
+        q: "Why does the line sit in the wrong place sometimes?",
+        a: "Rendering combining marks well is genuinely hard, and support varies by platform and by typeface. Most modern systems position the stroke correctly across the middle of the glyph. Older Android builds and some monospace faces place it high, low, or offset to one side.",
+      },
+      {
+        q: "Can I strike out text that is already styled?",
+        a: "Yes. The mark attaches to whatever character precedes it, whether that is an ordinary letter or one of the substituted alphabets, so you can generate a bold phrase elsewhere on this site and run it through here. Support for the combination is patchier than for either part alone.",
+      },
+      {
+        q: "Will backspace delete the whole character?",
+        a: "It depends on the editor. Some treat the letter and its mark as one unit and remove both; others remove only the mark, so the second press is needed to remove the letter. Neither behaviour is wrong — they are different interpretations of what a character is.",
+      },
+    ],
+  },
+
+  "upside-down-text-generator": {
+    intro: `Flipping a sentence takes two operations, and skipping either one gives a result that looks wrong without it being obvious why. Each letter has to be replaced with something shaped like its rotated form, and then the whole string has to be reversed — because turning a page over does not only invert the letters, it puts the last one on the left.
+
+The substitution table is the interesting part, and it is a scavenger hunt rather than a designed alphabet. Unicode has no upside-down Latin letters, so the characters used here are borrowed from wherever a suitable shape happened to be encoded. Turned letters from phonetics supply most of the lowercase. The flipped capital B is Deseret, an alphabet devised in nineteenth-century Utah. The G is Hebrew, the digit two is Hangul, and four and seven are Bopomofo, the Chinese phonetic script. None of them means anything remotely related to the letter it stands in for; they were chosen purely because they look right when rotated.
+
+Three variants are given. The full flip does both operations and is what almost everyone wants. The second flips the letters without reversing the order, which is only useful in the rare places that reverse text for you and would otherwise undo the effect twice over. The third simply reverses the order without touching the letters, which is a different party trick altogether.
+
+Predictably, a screen reader announces this as a string of unrelated symbols from four writing systems, which is exactly what it is.`,
+    steps: [
+      "Type your message in the box.",
+      "Take the first row for the ordinary effect: letters flipped and reading order reversed.",
+      "Copy it with the button on that row.",
+      "Paste it into a chat, a caption or a display name.",
+      "Check for stray characters — punctuation and accented letters have no flipped form and pass through as they are.",
+    ],
+    faq: [
+      {
+        q: "Why does the text also need to be reversed?",
+        a: "Because rotating a page moves the last character to the left-hand side. Flipping the letters without reversing the order gives something that looks scrambled rather than upside down, which is why the two operations always go together.",
+      },
+      {
+        q: "Where do the flipped letters actually come from?",
+        a: "From a dozen unrelated writing systems. The turned vowels are phonetic symbols, the flipped B is from the Deseret alphabet, one digit is Hangul and two more are Bopomofo. They were picked for their shapes alone, so the text is a genuine mixture of scripts once it leaves this page.",
+      },
+      {
+        q: "Why are some characters unchanged?",
+        a: "Nothing suitable exists for them. Accented letters, most punctuation and every non-Latin script have no rotated counterpart in Unicode, so they are passed through untouched rather than replaced with something that would change the meaning.",
+      },
+      {
+        q: "Will it display correctly everywhere?",
+        a: "Mostly, though it is less uniform than the mathematical alphabets, precisely because the characters are gathered from so many blocks. A device without a font covering Deseret or Bopomofo will show empty boxes for those few positions while the rest of the sentence flips fine.",
+      },
+    ],
+  },
+
+  "superscript-generator": {
+    intro: `Raised and lowered characters have a genuine job to do outside decoration. A footnote marker, a squared metre, an ordinal ending, the formula for water — all of them need a character sitting above or below the line, and plain-text fields offer no way to produce one.
+
+Unicode covers this, but unevenly, and the unevenness is the main thing to understand here. Superscript digits are complete and have been supported for decades, which is why squared and cubed appear correctly almost everywhere. Superscript letters are nearly complete: every lowercase letter has a raised form except q, which was never encoded and comes through unchanged.
+
+Subscript is far worse off. It has all ten digits, which is what chemical formulas need and why they work. Its letters are a scattered handful — roughly a, e, h, i, j, k, l, m, n, o, p, r, s, t, u, v and x — encoded for specific notational purposes and never completed. There is no subscript b, c, d, f, g, q, w, y or z, so a word written in subscript will come out as a mixture of lowered and ordinary letters. The tool counts how many were left behind and says so, rather than quietly producing something that looks broken.
+
+Capital letters have no raised or lowered forms at all in the ranges used here, so uppercase input is mapped to the lowercase equivalents where one exists.
+
+These characters carry meaning, which is an argument for using them properly. A squared symbol in a measurement is read correctly by assistive software; a whole word in raised letters is not.`,
+    steps: [
+      "Type what you need raised or lowered — a footnote number, a formula, an ordinal.",
+      "Take the superscript row for anything above the line, the subscript row for anything below it.",
+      "Copy the row you want.",
+      "Paste it into the field that has no formatting controls.",
+      "Look at the note: it counts the letters with no raised or lowered form, and there are more than you would expect.",
+    ],
+    faq: [
+      {
+        q: "Why is there no subscript for most letters?",
+        a: "They were never encoded. The subscript letters that exist were added for particular uses in mathematics and phonetics, one at a time, and the set was never rounded out into a full alphabet. Roughly nine lowercase letters have no lowered form at all, which is why subscript words come out mixed.",
+      },
+      {
+        q: "Which letter is missing from superscript?",
+        a: "The letter q, and only that one. Every other lowercase letter has a raised form. It is a small enough gap that most text is unaffected, but a word containing a q will show one full-size letter among the raised ones.",
+      },
+      {
+        q: "Is this the right way to write a chemical formula?",
+        a: "For a plain-text field, yes, and it is one of the few genuinely good uses of this whole family. The subscript digits are complete, well supported and semantically correct, so a formula written with them reads properly and is announced sensibly by assistive software.",
+      },
+      {
+        q: "Can I use it for footnote markers?",
+        a: "Yes. The raised digits are the most reliably rendered characters in this entire group, dating back to the earliest days of the standard, and they display correctly even on old devices and in monospace terminals.",
+      },
+    ],
+  },
+
+  "bubble-text-generator": {
+    intro: `Enclosed letters — a character sitting inside a ring or a box — were added to Unicode for the sort of document that numbers its steps or labels its diagram parts. Circled digits mark a list; circled letters key a legend to a figure. They were never meant as a decorative alphabet, which is why the set behaves oddly in the places it does.
+
+Five variants appear on this page, and the bubble everyone means is the first: outlined circles, filled circles, outlined squares, filled squares, and letters in brackets. The outlined circles are the most complete, with separate upper and lower case and a full run of digits including a circled zero that sits on its own away from one to nine. The squares and the filled circles are uppercase only, so lowercase input is mapped to the capital forms rather than dropped.
+
+There is one genuine trap. Several of the filled variants live in ranges that some systems treat as emoji rather than as letters. On those platforms a filled circled A does not render as a dark disc with a white letter in it — it comes out coloured, at emoji size, sometimes with different proportions to the character beside it. The result can look wrong in a way that has nothing to do with the text being incorrect. It is worth checking on a phone before committing to one of the filled rows.
+
+Digits are only available in the outlined circle and bracketed rows. The square variants have no numerals, so any figures stay plain.
+
+As with the rest of the family, none of it is read aloud as words and none of it is searchable.`,
+    steps: [
+      "Type your text at the top.",
+      "Compare the five rows: outlined circles are the most complete and the most predictable.",
+      "Check the filled rows on a phone before using them — some platforms render them as emoji.",
+      "Copy the row you want.",
+      "Paste it into the caption, bio or comment.",
+    ],
+    faq: [
+      {
+        q: "Why do the filled letters look like emoji on my phone?",
+        a: "Because on some systems they are treated as emoji. The filled circled and squared letters fall in ranges that certain platforms render with their colour emoji font rather than the text font, so they appear coloured and sized differently from the letters next to them. Nothing is wrong with the text; the device is choosing a different presentation.",
+      },
+      {
+        q: "Why is my lowercase turned into capitals?",
+        a: "Because those variants have no lowercase. Only the outlined circles were given both cases. For the squares and the filled circles, mapping lowercase to the capital form keeps the word intact, which is better than leaving half of it unenclosed.",
+      },
+      {
+        q: "Why is the circled zero different from the other digits?",
+        a: "It was added later and sits on its own, well away from the run of one to nine. That gap catches out anyone who assumes the ten digits are consecutive, and produces a wrong character for zero if the assumption is not handled deliberately.",
+      },
+      {
+        q: "What were these characters actually for?",
+        a: "Numbering and labelling in technical documents — steps in a procedure, parts in a diagram, references in a legend. Japanese typesetting in particular uses them heavily, which is why the set is as extensive as it is.",
+      },
+    ],
+  },
+
+  "fullwidth-text-generator": {
+    intro: `Fullwidth characters come from a practical problem in East Asian typesetting rather than from any desire for a visual effect. Chinese, Japanese and Korean characters occupy a square cell, and mixing narrow Latin letters into a grid of them looked wrong and aligned badly. The answer was a second set of Latin letters, digits and punctuation drawn to fill the same square cell as a Chinese character, so a line of mixed text kept its rhythm.
+
+That is why every letter here appears with what looks like a wide space around it. The space is not added — it is part of the character, which is drawn to be twice as wide as usual. There is a matching fullwidth space too, used between words so the spacing stays even.
+
+The style acquired a second life entirely by accident. Early vaporwave artwork used fullwidth Latin for its titles, borrowing the look of Japanese software from the eighties and nineties, and the association stuck firmly enough that the aesthetic is now what most people are searching for when they arrive here.
+
+A spaced-out row is offered alongside it, which does something different: it inserts real spaces between ordinary letters. That version keeps the text searchable and readable to assistive software, at the cost of looking less uniform, and it is the better choice where the words still have to work as words.
+
+The fullwidth forms have complete coverage of letters, digits and punctuation, which makes this one of the few styles here with no gaps to warn you about. Support is excellent, since the characters have been in daily use across East Asia for decades.`,
+    steps: [
+      "Type your text in the box.",
+      "Take the fullwidth row for the vaporwave look, where the wide spacing is built into each character.",
+      "Take the spaced-out row instead if the text still has to be readable and searchable.",
+      "Copy the row you want.",
+      "Check it in a monospace context if that matters — each character occupies two columns.",
+    ],
+    faq: [
+      {
+        q: "Why do the letters look so far apart?",
+        a: "Because each character is drawn to fill a square cell the size of a Chinese character, which is roughly twice the width of a Latin letter. The gaps are part of the glyphs themselves rather than spaces between them, so you cannot tighten them up.",
+      },
+      {
+        q: "What is the difference between the two rows?",
+        a: "The first swaps each letter for a wide version of itself, so the text is no longer ordinary letters. The second keeps your letters exactly as they are and puts real spaces between them. Only the second stays searchable and readable to assistive software.",
+      },
+      {
+        q: "Why is this associated with vaporwave?",
+        a: "Because early artwork in that style borrowed the visual language of Japanese computing from the eighties and nineties, where fullwidth Latin was simply how Roman letters appeared on those systems. The look was adopted deliberately and became one of the genre's defining signals.",
+      },
+      {
+        q: "Does it break alignment in a terminal or a spreadsheet?",
+        a: "Often, yes. A fullwidth character is intended to occupy two columns in a monospaced grid, and software disagrees about whether to honour that. In a terminal it usually works; in a spreadsheet cell or a code editor the column width may not match what is drawn.",
+      },
+    ],
+  },
 };

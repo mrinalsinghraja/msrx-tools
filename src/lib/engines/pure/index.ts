@@ -48,6 +48,18 @@ import { logAnonymize, svgOptimize, unicodeInspect } from "./inspect";
 import { cidrCalculate, dnsParse, userAgentParse } from "./network";
 import { qrGenerate } from "./qr";
 import { readability } from "./readability";
+import {
+  boldText,
+  bubbleText,
+  cursiveText,
+  fancyText,
+  fullwidthText,
+  italicText,
+  smallCapsText,
+  strikethroughText,
+  superscriptText,
+  upsideDownText,
+} from "./unicode-style";
 import { graphqlFormat, jsonSchemaGenerate, sqlToTypeScript } from "./schema";
 import { passwordGenerate, randomString, uuidGenerate } from "./random";
 import {
@@ -169,6 +181,18 @@ export const PURE_OPS: Record<string, PureOp> = {
 
   // Reading
   readability,
+
+  // Unicode text styling
+  fancyText,
+  boldText,
+  italicText,
+  cursiveText,
+  smallCapsText,
+  strikethroughText,
+  upsideDownText,
+  superscriptText,
+  bubbleText,
+  fullwidthText,
 
   // CSS
   colorConvert,

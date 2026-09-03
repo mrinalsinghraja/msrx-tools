@@ -1,5 +1,9 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import type { DiffPayload } from "@/lib/engines/pure/text";
 import type { OpResult } from "@/lib/engines/types";
@@ -23,6 +27,17 @@ export function CustomResult({ tool, result }: { tool: ToolSpec; result: OpResul
     case "css-gradient-generator":
     case "box-shadow-generator":
       return <CssPreview slug={tool.slug} extra={result.extra as { css?: string } | undefined} />;
+    case "fancy-text-generator":
+    case "bold-text-generator":
+    case "italic-text-generator":
+    case "cursive-text-generator":
+    case "small-caps-generator":
+    case "strikethrough-text-generator":
+    case "upside-down-text-generator":
+    case "superscript-generator":
+    case "bubble-text-generator":
+    case "fullwidth-text-generator":
+      return <StyleGallery extra={result.extra as { styles?: StyledLine[] } | undefined} />;
     default:
       return null;
   }
@@ -238,3 +253,66 @@ export const SAMPLE_INPUTS: Record<
   "roman-numeral-converter": { input: "2026" },
   "number-to-words": { input: "1234567.89" },
 };
+
+interface StyledLine {
+  name: string;
+  text: string;
+}
+
+/**
+ * The styled alphabets, one row each with its own copy button.
+ *
+ * A single block of text would be the wrong shape here. Nobody wants thirty
+ * styles at once — they want the one that looks right, and they want it on the
+ * clipboard. Copying per row is the whole interaction, so it is a control on
+ * every row rather than one button at the top.
+ *
+ * The rows are deliberately not set in the site's monospace: these characters
+ * are drawn from a dozen different Unicode blocks and most monospace faces have
+ * no glyph for half of them, which would show a column of tofu boxes for text
+ * that is perfectly fine everywhere else.
+ */
+function StyleGallery({ extra }: { extra?: { styles?: StyledLine[] } }) {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(null), 1400);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  if (!extra?.styles?.length) return null;
+
+  async function copy(line: StyledLine) {
+    try {
+      await navigator.clipboard.writeText(line.text);
+      setCopied(line.name);
+    } catch {
+      // Clipboard access can be refused. The text is on screen and selectable.
+    }
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="annot">Styles</h2>
+      <ul className="divide-y divide-construction overflow-hidden rounded-lg border border-construction bg-sheet">
+        {extra.styles.map((line) => (
+          <li key={line.name} className="flex items-center gap-3 px-4 py-2.5">
+            <span className="w-40 shrink-0 text-[12px] leading-snug text-graphite-faint">{line.name}</span>
+            <span className="min-w-0 flex-1 break-words text-[15px] leading-relaxed text-graphite">
+              {line.text}
+            </span>
+            <Button size="sm" variant="ghost" onClick={() => void copy(line)} aria-label={`Copy ${line.name}`}>
+              {copied === line.name ? (
+                <Check className="size-3.5 text-good" aria-hidden />
+              ) : (
+                <Copy className="size-3.5" aria-hidden />
+              )}
+              {copied === line.name ? "Copied" : "Copy"}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
