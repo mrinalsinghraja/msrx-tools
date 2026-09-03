@@ -81,3 +81,37 @@ older ones to rely on today.
   The audio tools are arithmetic in `src/lib/engines/audio/dsp.ts`, and the
   video tools use WebCodecs — the codecs the browser already ships in order to
   play video — through Mediabunny.
+
+## The AI tools: what was deliberately not built
+
+Four things people expect beside a set of AI writing tools are missing on
+purpose. Recording the reasons here so the question does not get reopened
+without them.
+
+- **AI content detector.** Not shipped. Detectors do not work reliably, and
+  their errors are not randomly distributed — they fall hardest on non-native
+  writers and on anyone with a plain, regular style. The output of one is used
+  to accuse real students of cheating. A tool this site cannot make accurate is
+  a tool this site should not offer, and a confident percentage would be the
+  most harmful possible way to present it.
+
+- **Plagiarism checker.** Not possible here and not honest to fake. Real
+  plagiarism detection requires a web-scale index of existing documents to
+  compare against. A language model asked whether text is plagiarised will
+  produce a fluent answer with no index behind it at all.
+
+- **Fact checker.** Not shipped. A model has no live sources and cannot verify
+  a claim; asked to, it produces confident agreement or confident disagreement
+  from the same place it produces everything else. A tool that appears to
+  verify facts and does not is worse than no tool.
+
+- **AI humanizer.** Not shipped under that name or that purpose. The product
+  being sold elsewhere is detector evasion, which is only useful for passing
+  generated work off as one's own — and which does not reliably work either.
+  The legitimate half of the demand, making generated prose read less
+  mechanically, is served by the Tone Changer and the Text Simplifier, which
+  say what they do.
+
+The Readability Checker is in the AI category and is not an AI tool. Reading
+scores are arithmetic from 1948 to 1975 and run in the browser like the rest of
+the site. It is grouped there because that is where people look for it.

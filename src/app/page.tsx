@@ -16,7 +16,7 @@ export default function HomePage() {
       <section className="border-b-2 border-graphite">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
           <p className="annot">
-            {TOOL_COUNT} tools · free · no account · nothing uploaded
+            {TOOL_COUNT} tools · free · no account · no file ever uploaded
           </p>
           <h1 className="stamp mt-5 max-w-4xl text-[2.1rem] font-semibold leading-[1.05] text-graphite sm:text-[3.4rem]">
             Every file tool you need.

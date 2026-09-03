@@ -255,7 +255,14 @@ export function Notice({
   tone = "info",
   children,
 }: {
-  tone?: "info" | "error";
+  /**
+   * `warn` is not a weaker error. It is a standing caution about something
+   * working exactly as intended — most of all the AI tools, which really do
+   * send your text to a server. So it borrows the revision pen's red for the
+   * rule and the wash, to make it the thing on the panel your eye lands on,
+   * and keeps ordinary graphite ink, because nothing has gone wrong.
+   */
+  tone?: "info" | "warn" | "error";
   children: React.ReactNode;
 }) {
   return (
@@ -263,9 +270,9 @@ export function Notice({
       role={tone === "error" ? "alert" : undefined}
       className={cn(
         "rounded-md border px-3 py-2 text-[13px] leading-relaxed",
-        tone === "error"
-          ? "border-pen-rev/30 bg-pen-rev-wash text-pen-rev"
-          : "border-construction bg-sunk text-graphite-soft",
+        tone === "error" && "border-pen-rev/30 bg-pen-rev-wash text-pen-rev",
+        tone === "warn" && "border-pen-rev/40 bg-pen-rev-wash text-graphite-soft",
+        tone === "info" && "border-construction bg-sunk text-graphite-soft",
       )}
     >
       {children}

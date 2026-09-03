@@ -29,12 +29,18 @@ export function ResultPanel({
    * figures, the note and the copy controls remain.
    */
   outputShownAbove = false,
+  /**
+   * What the empty box says. The default suits a tool that recomputes as you
+   * type; a tool you have to press a button to run needs to say so instead.
+   */
+  idleMessage = "The result appears here as you type.",
 }: {
   tool: ToolSpec;
   result: OpResult | null;
   error: string | null;
   busy: boolean;
   outputShownAbove?: boolean;
+  idleMessage?: string;
 }) {
   return (
     <section className="flex min-h-0 flex-col gap-3" aria-live="polite">
@@ -66,7 +72,7 @@ export function ResultPanel({
           </pre>
         ) : (
           <p className="text-sm text-graphite-faint">
-            {error ? "Fix the input above and the result appears here." : "The result appears here as you type."}
+            {error ? "Fix the input above and the result appears here." : idleMessage}
           </p>
         )}
       </output>

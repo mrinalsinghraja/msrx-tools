@@ -24,6 +24,10 @@ const ENGINE_NOTE: Record<ToolSpec["engine"], string> = {
   crypto: "This tab · WebCrypto",
   audio: "This tab · audio engine",
   video: "This tab · WebCodecs",
+  // The only value in this table that is not "this tab", and the reason the
+  // column exists at all: a visitor should be able to see where the work goes
+  // without reading the page.
+  ai: "A server · AI model",
 };
 
 function extList(exts: string[]) {
@@ -68,7 +72,18 @@ export function SpecBlock({ tool }: { tool: ToolSpec }) {
     });
   }
 
-  rows.push({ label: "Uploads", value: "None", note: "There is no server to send it to" });
+  // The last row is the one people came for. On the AI tools it has to give the
+  // opposite answer, and give it as plainly as the other rows give theirs — a
+  // spec block that hedged here would be worse than not having the row.
+  rows.push(
+    tool.engine === "ai"
+      ? {
+          label: "Sends",
+          value: "Your text",
+          note: "Posted to a server and on to an AI provider. Never a file — this tool takes none",
+        }
+      : { label: "Uploads", value: "None", note: "There is no server to send it to" },
+  );
 
   return (
     <aside className="pane" aria-label={`${tool.title} specification`}>
@@ -80,7 +95,11 @@ export function SpecBlock({ tool }: { tool: ToolSpec }) {
             <dd>
               <span
                 className={`block font-mono text-[13px] ${
-                  row.label === "Uploads" ? "text-pen-new" : "text-graphite"
+                  row.label === "Uploads"
+                    ? "text-pen-new"
+                    : row.label === "Sends"
+                      ? "text-pen-rev"
+                      : "text-graphite"
                 }`}
               >
                 {row.value}

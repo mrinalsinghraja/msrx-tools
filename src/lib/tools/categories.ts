@@ -56,6 +56,15 @@ export const CATEGORIES: Category[] = [
       "JSON, YAML, CSV, XML and plain prose — reformat, validate, convert between them, diff two versions and tidy the result.",
   },
   {
+    id: "ai",
+    slug: "ai",
+    title: "AI",
+    short: "Prompts, rewriting, summaries, translation",
+    icon: "Sparkles",
+    blurb:
+      "Draft a prompt, tighten a paragraph, translate a page, turn a mess of notes into a table. This is the one category that uses a server — the text you send here is answered by a language model, and the tools say so on every page.",
+  },
+  {
     id: "dev",
     slug: "dev",
     title: "Developer",

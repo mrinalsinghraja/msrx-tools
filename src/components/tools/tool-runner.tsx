@@ -3,6 +3,7 @@
 import { RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { AiWorkspace } from "@/components/tools/ai-workspace";
 import { OptionsPanel } from "@/components/tools/options-panel";
 import { ResultPanel } from "@/components/tools/result-panel";
 import { CustomResult, SAMPLE_INPUTS } from "@/components/tools/custom-panels";
@@ -26,6 +27,10 @@ export function ToolRunner({ slug }: { slug: string }) {
   // File tools have a different shape entirely — a drop zone and an ordered
   // queue rather than a text box — so they get their own workspace.
   if (tool.io === "file") return <FileWorkspace tool={tool} />;
+  // AI tools look like text tools and behave nothing like them: the work costs
+  // money, happens elsewhere and arrives a token at a time, so running on every
+  // keystroke is exactly the wrong shape. They get a button and a stream.
+  if (tool.engine === "ai") return <AiWorkspace tool={tool} />;
   return <Workspace tool={tool} />;
 }
 

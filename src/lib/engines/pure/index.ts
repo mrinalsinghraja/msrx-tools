@@ -47,6 +47,7 @@ import { gitignoreBuild, mockData } from "./generate";
 import { logAnonymize, svgOptimize, unicodeInspect } from "./inspect";
 import { cidrCalculate, dnsParse, userAgentParse } from "./network";
 import { qrGenerate } from "./qr";
+import { readability } from "./readability";
 import { graphqlFormat, jsonSchemaGenerate, sqlToTypeScript } from "./schema";
 import { passwordGenerate, randomString, uuidGenerate } from "./random";
 import {
@@ -165,6 +166,9 @@ export const PURE_OPS: Record<string, PureOp> = {
   shamirCombine,
   rsaKeypair,
   rsaSign,
+
+  // Reading
+  readability,
 
   // CSS
   colorConvert,

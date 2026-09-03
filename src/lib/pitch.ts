@@ -40,7 +40,7 @@ export const CLAIMS: Claim[] = [
   {
     icon: "WifiOff",
     title: "Works with the internet off",
-    body: "Once a tool page has loaded, pull the plug and it keeps working — which is only possible because the processing was never happening elsewhere.",
+    body: "Once a tool page has loaded, pull the plug and it keeps working — which is only possible because the processing was never happening elsewhere. The AI tools are the exception and say so on their own pages: those need a model, and a model needs a server.",
     proof: "The strongest proof there is: code that needed a server could not do this.",
   },
 ];
@@ -71,7 +71,7 @@ export const COMPARISONS: Comparison[] = [
   {
     question: "What happens on a bad connection?",
     others: "Upload, wait, download. A dropped connection means starting again.",
-    here: "The page loads once. After that the network is not involved.",
+    here: "The page loads once, and after that the network is not involved — outside the AI tools, which are the one category that needs it.",
   },
   {
     question: "What is being collected?",
@@ -88,7 +88,7 @@ export const HOME_FAQ = [
   },
   {
     q: "How can I check that my files are not being uploaded?",
-    a: "Open your browser's developer tools, go to the Network tab, and run any tool. You will see the page load and then nothing further. A stronger test: load a tool page, disconnect from the internet completely, and use it. It will work. Software that was quietly uploading your file could not.",
+    a: "Open your browser's developer tools, go to the Network tab, and run any tool. You will see the page load and then nothing further. A stronger test: load a tool page, disconnect from the internet completely, and use it. It will work. Software that was quietly uploading your file could not. Try it on the AI tools and they will fail instead, which is the same test telling you the truth about those — they are the only ones that need a server, and none of them accepts a file.",
   },
   {
     q: "Does it work in incognito or private browsing?",
@@ -96,7 +96,7 @@ export const HOME_FAQ = [
   },
   {
     q: "Is anything at all sent to a server?",
-    a: "One thing, and only if you use it: the AI assistant on each tool page. When you ask it a question, the question you typed and the name of the tool are sent to be answered. Your files, and whatever you put into the tool, are not sent and the assistant cannot see them. Every other feature on the site sends nothing at all.",
+    a: "Two things, and only if you use them. The first is the AI assistant on each tool page: when you ask it a question, the question you typed and the name of the tool are sent to be answered. Your files, and whatever you put into the tool, are not sent and the assistant cannot see them. The second is the AI category itself — those tools take text and send it to a language model, because a model is far too large to run in a browser tab. Every page in that category says so on itself, in place of the promise the rest of the site makes. Nothing else here sends anything at all, and no file is ever sent by any of them.",
   },
   {
     q: "Is there a file size limit?",
@@ -119,6 +119,6 @@ export const HOME_FAQ = [
 export const PITCH = {
   headline: "Every file tool you need. None of them upload your files.",
   subhead:
-    "Free forever, no account, works offline. PDFs, images, text and data — all processed inside your own browser.",
+    "Free forever, no account, works offline. PDFs, images, video, audio, text and data — all processed inside your own browser. Plus a small set of AI writing tools, which are the only ones that use a server and say so.",
   oneLiner: "A hundred-plus free file tools that run in your browser. Nothing uploads, nothing is stored, no login.",
 } as const;

@@ -12,6 +12,7 @@ import {
   privacyNotice,
   termsOfUse,
 } from "@/lib/legal";
+import { getTool, TOOLS } from "@/lib/tools/registry";
 
 /**
  * A privacy notice that quietly stops matching the software is worse than
@@ -26,8 +27,10 @@ function readSource(...segments: string[]): string {
 }
 
 const privacy = privacyNotice(CONTACT_EMAIL);
+// Headings are copy too. A section titled "the one exception" is a claim about
+// the software as surely as any sentence under it, so it is checked alongside.
 const allPrivacyText = privacy.sections
-  .flatMap((section) => [...(section.paragraphs ?? []), ...(section.bullets ?? [])])
+  .flatMap((section) => [section.heading, ...(section.paragraphs ?? []), ...(section.bullets ?? [])])
   .join("\n");
 
 describe("document structure", () => {
@@ -154,10 +157,29 @@ describe("the privacy notice matches the code", () => {
   });
 
   it("describes the rate limiter holding an IP in memory, which it does", () => {
-    expect(allPrivacyText).toMatch(/holds your IP address in memory/i);
+    expect(allPrivacyText).toMatch(/hold(?:s)? your IP address in memory/i);
     const limiter = readSource("lib", "ai", "rate-limit.ts");
     expect(limiter).toMatch(/new Map<string, Bucket>/);
     expect(limiter).not.toMatch(/prisma|postgres|redis|fs\.write/i);
+  });
+
+  it("discloses the AI tools as a second exception, and says no file is sent", () => {
+    // The notice said "the one exception" for as long as the assistant was the
+    // only thing leaving the device. A whole category now does, and a privacy
+    // page that still counted one would be wrong in the direction that matters.
+    expect(allPrivacyText).toMatch(/second exception/i);
+    expect(allPrivacyText).toMatch(/No file is ever sent by an AI tool/i);
+    // The claim above is only true while no AI tool accepts files, so check it
+    // against the registry rather than trusting the sentence.
+    for (const tool of TOOLS.filter((entry) => entry.engine === "ai")) {
+      expect(tool.accepts).toBeUndefined();
+      expect(tool.io).toBe("text");
+    }
+  });
+
+  it("names the one AI-category tool that still runs on the device", () => {
+    expect(allPrivacyText).toMatch(/readability checker/i);
+    expect(getTool("readability-checker")?.engine).toBe("pure");
   });
 
   it("does not promise a data-subject process the site cannot perform", () => {
@@ -210,9 +232,15 @@ describe("the terms match how the site behaves", () => {
     expect(text).toMatch(/may be incorrect|can be wrong/i);
   });
 
-  it("discloses the assistant's rate limit, which the route enforces", () => {
-    expect(text).toMatch(/limited to a modest number of questions/i);
-    expect(readSource("lib", "ai", "rate-limit.ts")).toMatch(/REQUESTS_PER_WINDOW/);
+  it("discloses the rate limits, which the routes enforce", () => {
+    expect(text).toMatch(/limited to a modest number of requests/i);
+    // The terms say the two allowances are counted separately. They are only
+    // separate because the routes namespace their keys, so check that too.
+    expect(text).toMatch(/counted separately/i);
+    const limiter = readSource("lib", "ai", "rate-limit.ts");
+    expect(limiter).toMatch(/REQUESTS_PER_WINDOW/);
+    expect(limiter).toMatch(/GENERATE_ALLOWANCE/);
+    expect(readSource("app", "api", "ai", "route.ts")).toMatch(/gen:\$\{callerKey/);
   });
 });
 

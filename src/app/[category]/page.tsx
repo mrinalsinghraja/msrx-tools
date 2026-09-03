@@ -53,8 +53,19 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
         </h1>
         <div className="section-rule mt-4 rounded-full" />
         <p className="mt-5 text-base leading-relaxed text-graphite-soft">{category.blurb}</p>
-        <p className="annot mt-3 font-medium text-pen-new">
-          {tools.length} tools · free · nothing uploaded
+        {/* The AI category cannot carry the badge the other nine carry. Saying
+            "nothing uploaded" above a page of tools that post your text to a
+            server is the exact kind of quiet untruth the rest of this site is
+            built to avoid. */}
+        <p
+          className={
+            category.id === "ai"
+              ? "annot mt-3 font-medium text-pen-rev"
+              : "annot mt-3 font-medium text-pen-new"
+          }
+        >
+          {tools.length} tools · free ·{" "}
+          {category.id === "ai" ? "uses a server · no files accepted" : "nothing uploaded"}
         </p>
       </header>
 

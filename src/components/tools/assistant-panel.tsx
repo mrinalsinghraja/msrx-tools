@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Notice } from "@/components/ui/primitives";
 import { MAX_QUESTION_LENGTH } from "@/lib/ai/limits";
 import { stripMarkdown } from "@/lib/ai/plain-text";
+import { getTool } from "@/lib/tools/registry";
 import { cn } from "@/lib/utils";
 
 /**
@@ -172,10 +173,16 @@ export function AssistantPanel({
       ) : null}
 
       <p className="mt-5 border-t border-construction pt-4 text-xs leading-relaxed text-graphite-faint">
-        This is the one part of the site that uses a server. The question you type here is sent to
-        an AI provider to be answered — <strong className="font-medium text-graphite-soft">your files
-        and whatever you put in the tool above are not</strong>, and the assistant cannot see them.
-        Answers are generated and can be wrong; the tool itself is not guessing.
+        The question you type here is sent to an AI provider to be answered —{" "}
+        <strong className="font-medium text-graphite-soft">
+          your files and whatever you put in the tool above are not
+        </strong>
+        , and the assistant cannot see them. Answers are generated and can be wrong.{" "}
+        {/* Worth saying on the hundred and forty-seven tools where it is true,
+            and worth not saying on the twenty-three where it is not. */}
+        {getTool(slug)?.engine === "ai"
+          ? "So is what the tool above produces — it runs on a model too."
+          : "The tool itself is not guessing: it runs deterministic code on your device."}
       </p>
     </section>
   );

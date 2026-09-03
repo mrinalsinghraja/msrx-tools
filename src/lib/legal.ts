@@ -46,13 +46,13 @@ export function privacyNotice(contactEmail: string): LegalDocument {
     title: "Privacy notice",
     standfirst: "What this site does with your information, which is very close to nothing.",
     summary:
-      "MSRX Tools processes your files inside your own browser. No accounts, no uploads, no cookies, no analytics. The one exception is the AI assistant, and it is described here in full.",
+      "MSRX Tools processes your files inside your own browser. No accounts, no uploads, no cookies, no analytics. Two features use a server — the AI assistant and the AI tools — and both are described here in full.",
     sections: [
       {
         heading: "The short version",
         paragraphs: [
           "Every tool on this site runs inside the browser tab you have open. Your files are read by JavaScript running on your own device, processed there, and handed back to you there. They are never uploaded, so there is no copy of them anywhere for us to keep, lose or be compelled to hand over.",
-          "There are no accounts, so we do not know who you are. There are no cookies and no analytics, so we do not know what you did. There is one exception — the AI assistant — and it is described in full below rather than buried.",
+          "There are no accounts, so we do not know who you are. There are no cookies and no analytics, so we do not know what you did. Two features are exceptions — the AI assistant and the AI tools — and both are described in full below rather than buried.",
         ],
       },
       {
@@ -74,19 +74,28 @@ export function privacyNotice(contactEmail: string): LegalDocument {
         ],
       },
       {
-        heading: "The AI assistant — the one exception",
+        heading: "The AI assistant — the first exception",
         paragraphs: [
-          "Each tool page has an assistant that answers questions about that tool. It is the only part of this site that uses a server, and the only thing that leaves your device.",
-          "When you ask it something, two pieces of information are sent to our server and on to Groq, the AI provider that generates the answer: the question you typed, and the name of the tool you are on. That is the entire payload.",
+          "Each tool page has an assistant that answers questions about that tool. When you ask it something, two pieces of information are sent to our server and on to Groq, the AI provider that generates the answer: the question you typed, and the name of the tool you are on. That is the entire payload.",
           "What is not sent: your files, the contents of the tool's input box, the results it produced, or anything identifying you. The assistant genuinely cannot see them — they are never included in the request, so there is nothing for it to read.",
-          "Groq processes the question to produce the answer and applies its own retention policy to it, which is outside our control. Treat anything you type into the assistant as you would treat a question typed into any AI chat: do not paste confidential text into it. The tools themselves have no such caveat, because they send nothing.",
+          "Groq processes the question to produce the answer and applies its own retention policy to it, which is outside our control. Treat anything you type into the assistant as you would treat a question typed into any AI chat: do not paste confidential text into it.",
+        ],
+      },
+      {
+        heading: "The AI tools — the second exception",
+        paragraphs: [
+          "The tools in the AI category — summarising, translating, rewriting, prompt writing and the rest — cannot run in your browser, because a language model is orders of magnitude too large to download into a tab. The text you put into one of those tools is sent to our server and on to Groq to be worked on, and the answer is streamed back.",
+          "What is sent is the text you typed into that tool and the settings you chose on that page. Nothing else: no file, no record of any other tool you have used, and no identifier, because none exists. Your text is not written to any database, log or file that we keep — it is held in memory only for as long as the request takes.",
+          "Groq applies its own retention policy to what it receives, which is outside our control. So the standing advice on those pages is the plain one: do not paste anything you would not paste into any other website. Every page in that category carries this warning on itself rather than relying on you to find this notice.",
+          "No file is ever sent by an AI tool. That category accepts typed and pasted text only, which is deliberate: it is what allows this site to go on saying, of every one of its tools without qualification, that your files never leave your device.",
+          "One tool in that category — the readability checker — runs entirely in your browser like the rest of the site, because reading scores are arithmetic. It sends nothing.",
         ],
       },
       {
         heading: "Server logs",
         paragraphs: [
-          "This site is hosted on Vercel. Like any web host, Vercel records standard request information — the page requested, the time, your IP address and your browser's user agent — for the pages it serves and for the assistant endpoint. We do not add to those logs, query them, or connect them to anything else.",
-          "The assistant endpoint limits how many questions one visitor can ask in an hour. To do that it holds your IP address in memory for the length of that window. It is not written to a database and does not survive the server restarting.",
+          "This site is hosted on Vercel. Like any web host, Vercel records standard request information — the page requested, the time, your IP address and your browser's user agent — for the pages it serves and for the two AI endpoints. We do not add to those logs, query them, or connect them to anything else.",
+          "Both AI endpoints limit how many requests one visitor can make in an hour, counted separately so that running a tool does not use up your ability to ask a question about one. To do that they hold your IP address in memory for the length of that window. It is not written to a database and does not survive the server restarting.",
         ],
       },
       {
@@ -99,7 +108,7 @@ export function privacyNotice(contactEmail: string): LegalDocument {
       {
         heading: "Children",
         paragraphs: [
-          "This site is not directed at children specifically, but it collects nothing from anyone, so a child using it is in exactly the same position as an adult: nothing about them is gathered, stored or shared. The assistant is the only feature that transmits anything, and it transmits only the question typed into it.",
+          "This site is not directed at children specifically, but it collects nothing from anyone, so a child using it is in exactly the same position as an adult: nothing about them is gathered, stored or shared. The AI assistant and the AI tools are the only features that transmit anything, and each transmits only what was typed into it.",
         ],
       },
       {
@@ -143,16 +152,17 @@ export function termsOfUse(contactEmail: string): LegalDocument {
         ],
       },
       {
-        heading: "The assistant can be wrong",
+        heading: "Anything generated by a model can be wrong",
         paragraphs: [
           "Answers from the AI assistant are generated by a language model and may be incorrect. It is briefed on what each tool does, but it is not reading your files and it cannot inspect your results. Do not rely on it for legal, security or safety judgements.",
+          "The same applies to everything the AI tools produce — a translation, a summary, a corrected paragraph, a query, a citation. A language model is fluent whether or not it is right, so read the output rather than trusting its tone. Do not use it unchecked where a mistake would cost something: a contract, a medical instruction, a query that writes to a database, or a reference in work that will be marked.",
           "The tools themselves are not guessing. They run deterministic code, and where a tool makes an approximation — detecting headings by font size, matching a background colour by tolerance — it says so in the result.",
         ],
       },
       {
-        heading: "Fair use of the assistant",
+        heading: "Fair use of the AI features",
         paragraphs: [
-          "The assistant runs on a paid API and is limited to a modest number of questions per visitor per hour. Automated or bulk use of that endpoint is not permitted and will be blocked. Everything else on the site has no limits at all, because it costs nothing to run.",
+          "The assistant and the AI tools both run on a paid API and are each limited to a modest number of requests per visitor per hour, counted separately. Automated or bulk use of those endpoints is not permitted and will be blocked. Everything else on the site has no limits at all, because it costs nothing to run.",
         ],
       },
       {

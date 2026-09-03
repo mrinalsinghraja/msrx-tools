@@ -9,7 +9,8 @@ import { ToolCard } from "@/components/tools/tool-card";
 import { ToolRunner } from "@/components/tools/tool-runner";
 import { getToolContent } from "@/content/tools";
 import { presetQuestions } from "@/lib/ai/prompt";
-import { SITE, PRIVACY_LINE } from "@/lib/site";
+import { AiDisclosure } from "@/components/tools/ai-disclosure";
+import { SITE, privacyLineFor } from "@/lib/site";
 import { CATEGORY_BY_SLUG, categoryOf } from "@/lib/tools/categories";
 import { getTool, relatedTools, TOOLS, toolHref } from "@/lib/tools/registry";
 import type { ToolSpec } from "@/lib/tools/types";
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: PageProps<"/[category]/[tool]
   if (!tool) return {};
 
   const title = `${tool.title} — free, no upload`;
-  const description = `${tool.short}. ${PRIVACY_LINE}`;
+  const description = `${tool.short}. ${privacyLineFor(tool.engine)}`;
   const url = `${SITE.url}${toolHref(tool)}`;
 
   return {
@@ -85,7 +86,9 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
           <h1 className="stamp text-3xl font-semibold text-graphite sm:text-4xl">{tool.title}</h1>
           <div className="section-rule mt-4 max-w-xs" />
           <p className="mt-5 text-base leading-relaxed text-graphite-soft">{tool.short}.</p>
-          <p className="annot mt-3 text-pen-new">{PRIVACY_LINE}</p>
+          <p className={tool.engine === "ai" ? "annot mt-3 text-pen-rev" : "annot mt-3 text-pen-new"}>
+            {privacyLineFor(tool.engine)}
+          </p>
         </div>
 
         {/* The facts you want before starting, read straight from the registry
@@ -94,6 +97,10 @@ export default async function ToolPage({ params }: PageProps<"/[category]/[tool]
       </header>
 
       <ToolRunner slug={tool.slug} />
+
+      {/* Stated once per page, from the registry, rather than written into the
+          prose of every AI tool — it is a fact about the category. */}
+      {tool.engine === "ai" ? <AiDisclosure /> : null}
 
       <AssistantPanel slug={tool.slug} toolTitle={tool.title} presets={presetQuestions(tool)} />
 
@@ -185,7 +192,7 @@ function buildJsonLd(
       applicationCategory: "UtilitiesApplication",
       applicationSubCategory: categoryTitle,
       operatingSystem: "Any browser",
-      description: `${tool.short}. ${PRIVACY_LINE}`,
+      description: `${tool.short}. ${privacyLineFor(tool.engine)}`,
       offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
       publisher: { "@type": "Organization", name: SITE.brand, url: SITE.brandUrl },
     },

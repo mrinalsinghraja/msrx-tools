@@ -1,5 +1,6 @@
 import type { ToolContent } from "@/lib/tools/types";
 
+import { AI_CONTENT } from "./ai";
 import { AUDIO_CONTENT } from "./audio";
 import { CALC_CONTENT } from "./calc";
 import { DEV_CONTENT } from "./dev";
@@ -20,6 +21,7 @@ import { VIDEO_CONTENT } from "./video";
  */
 export const TOOL_CONTENT: Record<string, ToolContent> = {
   ...TEXT_CONTENT,
+  ...AI_CONTENT,
   ...DEV_CONTENT,
   ...SECURITY_CONTENT,
   ...FILE_CONTENT,

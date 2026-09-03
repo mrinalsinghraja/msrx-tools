@@ -20,7 +20,8 @@ export type CategoryId =
   | "dev"
   | "security"
   | "calc"
-  | "video";
+  | "video"
+  | "ai";
 
 /** Which worker bundle runs the op. `pure` needs no WASM and no worker warm-up. */
 export type EngineId =
@@ -32,7 +33,8 @@ export type EngineId =
   | "data"
   | "crypto"
   | "audio"
-  | "video";
+  | "video"
+  | "ai";
 
 /**
  * The shape of the tool's workspace.

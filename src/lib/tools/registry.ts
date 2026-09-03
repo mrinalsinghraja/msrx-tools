@@ -1,4 +1,5 @@
 import { CATEGORIES, CATEGORY_BY_ID } from "./categories";
+import { AI_TOOLS } from "./catalog/ai";
 import { AUDIO_TOOLS } from "./catalog/audio";
 import { CALC_TOOLS } from "./catalog/calc";
 import { DEV_TOOLS } from "./catalog/dev";
@@ -24,6 +25,7 @@ export const TOOLS: ToolSpec[] = [
   ...AUDIO_TOOLS,
   ...FILE_TOOLS,
   ...TEXT_TOOLS,
+  ...AI_TOOLS,
   ...DEV_TOOLS,
   ...SECURITY_TOOLS,
   ...CALC_TOOLS,

@@ -20,6 +20,22 @@ const BUCKETS = new Map<string, Bucket>();
 export const REQUESTS_PER_WINDOW = 12;
 export const WINDOW_MS = 60 * 60 * 1000; // one hour
 
+export interface Allowance {
+  perWindow: number;
+  windowMs: number;
+}
+
+/** Answering a question about a tool. Short answers, so a loose allowance. */
+export const ASSISTANT_ALLOWANCE: Allowance = { perWindow: REQUESTS_PER_WINDOW, windowMs: WINDOW_MS };
+
+/**
+ * Running an AI tool. A generation can be twenty times the size of an
+ * assistant answer, so this bucket is counted separately rather than sharing
+ * one allowance — otherwise a few summaries of a long report would use up
+ * somebody's ability to ask what a button does.
+ */
+export const GENERATE_ALLOWANCE: Allowance = { perWindow: 20, windowMs: WINDOW_MS };
+
 /** Stops the map growing without bound on a long-lived instance. */
 function evictStale(now: number) {
   if (BUCKETS.size < 5000) return;
@@ -34,22 +50,28 @@ export interface RateVerdict {
   retryAfterSeconds: number;
 }
 
-export function take(key: string, now = Date.now()): RateVerdict {
+export function take(
+  key: string,
+  now = Date.now(),
+  allowance: Allowance = ASSISTANT_ALLOWANCE,
+): RateVerdict {
   evictStale(now);
+
+  const { perWindow, windowMs } = allowance;
 
   const bucket = BUCKETS.get(key);
   if (!bucket) {
-    BUCKETS.set(key, { tokens: REQUESTS_PER_WINDOW - 1, updatedAt: now });
-    return { allowed: true, remaining: REQUESTS_PER_WINDOW - 1, retryAfterSeconds: 0 };
+    BUCKETS.set(key, { tokens: perWindow - 1, updatedAt: now });
+    return { allowed: true, remaining: perWindow - 1, retryAfterSeconds: 0 };
   }
 
   // Refill continuously rather than in steps, so the allowance recovers smoothly
   // instead of everyone being unblocked at the same instant.
-  const refill = ((now - bucket.updatedAt) / WINDOW_MS) * REQUESTS_PER_WINDOW;
-  const tokens = Math.min(REQUESTS_PER_WINDOW, bucket.tokens + refill);
+  const refill = ((now - bucket.updatedAt) / windowMs) * perWindow;
+  const tokens = Math.min(perWindow, bucket.tokens + refill);
 
   if (tokens < 1) {
-    const secondsPerToken = WINDOW_MS / REQUESTS_PER_WINDOW / 1000;
+    const secondsPerToken = windowMs / perWindow / 1000;
     bucket.updatedAt = now;
     bucket.tokens = tokens;
     return {
