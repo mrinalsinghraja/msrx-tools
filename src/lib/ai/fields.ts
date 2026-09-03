@@ -26,6 +26,19 @@ export interface AiField {
   format?: OutputFormat;
   /** A standing caveat about this tool's output, shown under every result. */
   note?: string;
+  /**
+   * Measure each line of the finished answer and show the figure.
+   *
+   * Here because a language model cannot count. Asked to, this one counts
+   * characters one at a time for thousands of tokens and still gets it wrong —
+   * on the meta description tool it spent its entire budget deliberating and
+   * returned an empty answer. The browser can count a string exactly, for free,
+   * so it does, and the recipe is told not to try.
+   *
+   * `min` and `max` are the range that matters for this tool, and each line is
+   * marked against them. Leave them out to show the count alone.
+   */
+  lineMetric?: { min?: number; max?: number };
 }
 
 export const AI_FIELDS: Record<string, AiField> = {
@@ -99,12 +112,19 @@ export const AI_FIELDS: Record<string, AiField> = {
     runLabel: "Write the email",
   },
   "title-generator": {
+    // No fixed range: the limit depends on the platform chosen, from about 45
+    // characters for an email subject to 60 for a blog title. The count alone
+    // is what the writer needs.
+    lineMetric: {},
     maxChars: 8000,
     inputLabel: "What the piece is about",
     placeholder: "An article explaining why browser-based file tools are faster than uploading to a server",
     runLabel: "Generate titles",
   },
   "meta-description-generator": {
+    // Google truncates a description on pixel width; this range survives it on
+    // both desktop and mobile for ordinary sentence case.
+    lineMetric: { min: 140, max: 158 },
     maxChars: 12000,
     inputLabel: "The page, or what it is about",
     placeholder: "Paste the page's text, or describe it in a line or two…",

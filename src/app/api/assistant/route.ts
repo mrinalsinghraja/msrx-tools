@@ -82,6 +82,10 @@ export async function POST(request: Request) {
       stream: true,
       temperature: 0.3,
       max_tokens: MAX_ANSWER_TOKENS,
+      // The answer cap is deliberately small, and the model's reasoning is
+      // billed against it. At the provider's default effort a complicated
+      // question can spend the whole allowance thinking and return nothing.
+      reasoning_effort: "low",
       messages: [
         { role: "system", content: system },
         { role: "user", content: checked.question },

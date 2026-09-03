@@ -36,9 +36,35 @@ export interface Recipe {
   system: (options: OptionValues) => string;
   /** Names the fenced block in the user message, e.g. "TEXT", "DIFF", "IDEA". */
   material: string;
-  /** Cost ceiling per request, and the reason a runaway answer stops. */
+  /**
+   * Cost ceiling per request, and the reason a runaway answer stops.
+   *
+   * Size it for the thinking as well as the answer. The model behind these
+   * tools reasons before it writes, and that reasoning is billed against this
+   * same budget — a recipe that asked for three short lines inside 900 tokens
+   * spent every one of them deliberating and streamed back nothing at all.
+   * Never ask for arithmetic here either: told to count characters it will
+   * count them one at a time, for thousands of tokens, and still get it wrong.
+   * Counting is the page's job.
+   */
   maxTokens: number;
   temperature: number;
+  /**
+   * How long the model may deliberate before it writes.
+   *
+   * The one setting on this page that decides whether a tool works at all. The
+   * model reasons before answering and that reasoning is billed against
+   * `maxTokens`, so at the provider's default of "medium" a request for ten
+   * headlines spent all 1,200 tokens thinking and returned an empty string. The
+   * same request at "low" finished in 226 tokens with a complete answer.
+   *
+   * Default is therefore "low", which is right for every writing and
+   * transformation task here: they want fluency, not deliberation. "medium" is
+   * set only where the answer genuinely turns on working something out — a
+   * query against a schema, a regex flavour's limits, a bug in pasted code —
+   * and only where the budget is large enough to pay for both.
+   */
+  reasoningEffort?: "low" | "medium";
 }
 
 /* ------------------------------------------------------------------ */
@@ -482,7 +508,7 @@ ${signoff ? `End with a sign-off and the name ${JSON.stringify(signoff)}.` : "En
 
   "title-generator": {
     material: "SUBJECT",
-    maxTokens: 1200,
+    maxTokens: 1600,
     temperature: 0.85,
     system: (o) => {
       const platform = str(o, "platform", "blog");
@@ -524,7 +550,7 @@ Rules:
 
   "meta-description-generator": {
     material: "PAGE",
-    maxTokens: 900,
+    maxTokens: 1800,
     temperature: 0.7,
     system: (o) => {
       const keyword = str(o, "keyword").slice(0, 80);
@@ -537,14 +563,14 @@ YOUR JOB
 Write ${Math.round(count)} meta description options for this page.
 
 Each one must:
-- Run between 140 and 158 characters including spaces. Count them. This is the constraint that matters, because Google truncates on pixel width and this range survives it.
-- Read as one or two complete sentences a person would write, not a keyword list.
+- Be one or two complete sentences of roughly 22 to 25 words. That is the length that survives in a search result, where Google truncates on pixel width.
+- Read as something a person would write, not a keyword list.
 - Say what the page gives the reader, specifically. "Learn about PDFs" is not a description.
 - Be different from the others in angle, not only in wording.
 ${keyword ? `- Contain the phrase ${JSON.stringify(keyword)} naturally, near the start where it will be bolded in the result. Do not repeat it.` : ""}
 ${cta ? "- End with a short call to action that fits the page — free, no sign-up, try it, and so on, only if true of the page." : "- Not end with a call to action."}
 
-Number them, one per line, and put the character count in brackets at the end of each line.`;
+Number them, one per line, with nothing else on the line. Do not count characters and do not print a count: the page measures each line itself and shows the figure, which is the only way it can be right.`;
     },
   },
 
@@ -591,7 +617,7 @@ ${faq ? "\nThen a blank line, the line FAQ, and four to six questions a reader w
 
   "social-post-generator": {
     material: "IDEA",
-    maxTokens: 1200,
+    maxTokens: 1600,
     temperature: 0.85,
     system: (o) => {
       const platform = str(o, "platform", "linkedin");
@@ -623,6 +649,16 @@ Write one post for ${platforms[platform] ?? platforms.linkedin}
 
 ${voices[voice] ?? voices.plain}
 
+The hard constraint, before anything about style: every fact, number, outcome
+and reaction in the post must come from the material. Do not add a metric that
+was not given, do not describe how the work was done unless it says, and above
+all do not invent a response to it — no "early feedback shows", no "users are
+telling us", no adoption figures, no satisfaction numbers. That is the single
+most common way this kind of post becomes a quiet lie, and it is the sort of
+lie a colleague notices. If the material gives you one concrete fact, write a
+short post around that one fact rather than a long post around five invented
+ones.
+
 Never do these, whatever the platform:
 - Open with a one-word line followed by a full stop for effect.
 - Use "I'm thrilled to announce", "Let that sink in", "Here's the thing", or an em-dash-laden aphorism.
@@ -636,7 +672,7 @@ Return only the post text.`;
 
   "keyword-extractor": {
     material: "TEXT",
-    maxTokens: 1200,
+    maxTokens: 1600,
     temperature: 0.2,
     system: (o) => {
       const shape = str(o, "shape", "ranked");
@@ -666,6 +702,7 @@ Use the text's own wording. Do not normalise a term into what you think it shoul
   },
 
   "sentiment-analysis": {
+    reasoningEffort: "medium",
     material: "TEXT",
     maxTokens: 2000,
     temperature: 0.2,
@@ -692,6 +729,7 @@ Say plainly when something is ambiguous rather than forcing it into a category. 
   },
 
   "text-to-table": {
+    reasoningEffort: "medium",
     material: "TEXT",
     maxTokens: 3000,
     temperature: 0.1,
@@ -730,8 +768,9 @@ If the text has no repeating structure to extract, say so in one sentence instea
   },
 
   "regex-generator": {
+    reasoningEffort: "medium",
     material: "DESCRIPTION",
-    maxTokens: 1400,
+    maxTokens: 1800,
     temperature: 0.2,
     system: (o) => {
       const flavour = str(o, "flavour", "javascript");
@@ -763,6 +802,7 @@ ${examples ? "\nThen a blank line, the line MATCHES, and three or four example s
   },
 
   "sql-generator": {
+    reasoningEffort: "medium",
     material: "QUESTION",
     maxTokens: 1600,
     temperature: 0.2,
@@ -802,6 +842,7 @@ ${explain ? "\nAfter the query, a blank line, the line WHAT IT DOES, and two or 
   },
 
   "explain-code": {
+    reasoningEffort: "medium",
     material: "CODE",
     maxTokens: 2500,
     temperature: 0.3,
@@ -834,7 +875,7 @@ ${risks ? "\nThen a blank line, the line WATCH OUT, and anything genuinely risky
 
   "commit-message-generator": {
     material: "DIFF",
-    maxTokens: 900,
+    maxTokens: 1400,
     temperature: 0.3,
     system: (o) => {
       const convention = str(o, "convention", "conventional");
@@ -856,7 +897,7 @@ Write a commit message for this change.
 
 ${conventions[convention] ?? conventions.conventional}
 
-Keep the subject line to ${Math.round(limit)} characters or fewer. Count them.
+Keep the subject line to about ten words, and shorter if it reads well shorter. The page measures the exact length afterwards, so write for brevity rather than to a number.
 
 - Imperative mood: "add", not "added" or "adds". It completes the sentence "this commit will ...".
 - Describe the change, not the diff. "Fix crash when the file has no audio track" beats "Update media.ts".
@@ -872,7 +913,7 @@ ${
 
   "citation-generator": {
     material: "SOURCE",
-    maxTokens: 1000,
+    maxTokens: 1500,
     temperature: 0.1,
     system: (o) => {
       const style = str(o, "style", "apa");

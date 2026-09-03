@@ -47,6 +47,32 @@ describe("the AI catalogue", () => {
     }
   });
 
+  it("keeps deliberation low by default, because reasoning is billed against the answer", () => {
+    // Found by running every tool through a browser: at the provider's default
+    // effort, a request for ten headlines spent all 1,200 tokens thinking and
+    // streamed back an empty string. "low" answered the same prompt in 226.
+    for (const tool of aiTools) {
+      const effort = RECIPES[tool.slug].reasoningEffort ?? "low";
+      expect(["low", "medium"], tool.slug).toContain(effort);
+      // Anything allowed to deliberate must be able to afford it as well.
+      if (effort === "medium") expect(RECIPES[tool.slug].maxTokens, tool.slug).toBeGreaterThanOrEqual(1500);
+    }
+  });
+
+  it("never asks the model to count characters, which it cannot do", () => {
+    // The counting is done by the page, where it is arithmetic on a string.
+    // Asking the model instead is what produced the empty answer above.
+    for (const tool of aiTools) {
+      const system = RECIPES[tool.slug].system(defaultOptions(tool));
+      expect(system, tool.slug).not.toMatch(/count (?:them|the characters)\b/i);
+    }
+  });
+
+  it("gives a line-length readout to the tools whose output is length-constrained", () => {
+    expect(AI_FIELDS["meta-description-generator"].lineMetric).toEqual({ min: 140, max: 158 });
+    expect(AI_FIELDS["title-generator"].lineMetric).toBeDefined();
+  });
+
   it("puts a caveat on the tools whose output people are likeliest to over-trust", () => {
     for (const slug of ["grammar-checker", "translate-text", "sql-generator", "regex-generator"]) {
       expect(AI_FIELDS[slug].note, slug).toBeTruthy();
@@ -133,6 +159,18 @@ describe("compose", () => {
     expect(formal.ok).toBe(true);
     if (!formal.ok) return;
     expect(formal.composed.system).toContain("french");
+  });
+
+  it("takes the reasoning effort from the recipe and defaults it to low", () => {
+    const written = compose({ slug: "summarize-text", input: "a document" });
+    expect(written.ok).toBe(true);
+    if (!written.ok) return;
+    expect(written.composed.reasoningEffort).toBe("low");
+
+    const analytical = compose({ slug: "sql-generator", input: "count the orders" });
+    expect(analytical.ok).toBe(true);
+    if (!analytical.ok) return;
+    expect(analytical.composed.reasoningEffort).toBe("medium");
   });
 
   it("takes the token budget and temperature from the recipe, not the body", () => {

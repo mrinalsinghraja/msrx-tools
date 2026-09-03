@@ -32,6 +32,7 @@ export interface Composed {
   user: string;
   maxTokens: number;
   temperature: number;
+  reasoningEffort: "low" | "medium";
 }
 
 export type ComposeResult =
@@ -148,6 +149,7 @@ ${text}
 ---${marker}---`,
       maxTokens: recipe.maxTokens,
       temperature: recipe.temperature,
+      reasoningEffort: recipe.reasoningEffort ?? "low",
     },
   };
 }

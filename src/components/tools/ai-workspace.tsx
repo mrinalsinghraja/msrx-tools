@@ -8,8 +8,34 @@ import { ResultPanel } from "@/components/tools/result-panel";
 import { Button, Notice, Textarea } from "@/components/ui/primitives";
 import { aiField } from "@/lib/ai/fields";
 import { defaultOptions } from "@/lib/engines/run";
-import type { OpResult } from "@/lib/engines/types";
+import type { OpResult, OpStat } from "@/lib/engines/types";
 import type { OptionValue, OptionValues, ToolSpec } from "@/lib/tools/types";
+
+/**
+ * Counts each numbered line of an answer, and says whether it fits.
+ *
+ * The models these tools run on cannot count characters — asked to, they
+ * deliberate at length and still get it wrong — so anything with a length
+ * constraint is measured on this side, where it is arithmetic on a string.
+ * A leading list number is not part of the text the writer will paste, so it
+ * comes off before measuring.
+ */
+function measureLines(output: string, range: { min?: number; max?: number }): OpStat[] {
+  const lines = output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+
+  return lines.map((line, index) => {
+    const text = line.replace(/^\s*\d+[.)]\s*/, "").trim();
+    const count = [...text].length;
+    const short = range.min !== undefined && count < range.min;
+    const long = range.max !== undefined && count > range.max;
+    const verdict = long ? " · too long" : short ? " · too short" : range.max !== undefined ? " · fits" : "";
+    return { label: `Line ${index + 1}`, value: `${count} chars${verdict}` };
+  });
+}
 
 /**
  * The workspace for a tool that runs on a model.
@@ -115,10 +141,18 @@ export function AiWorkspace({ tool }: { tool: ToolSpec }) {
   // The result panel takes a finished op result, so the partial stream is
   // dressed as one. Everything it gives us — copy, download, the note — then
   // works on a half-written answer exactly as it does on a complete one.
-  const result: OpResult | null = useMemo(
-    () => (output ? { output, format: field?.format ?? "text", note: busy ? undefined : field?.note } : null),
-    [output, busy, field],
-  );
+  const result: OpResult | null = useMemo(() => {
+    if (!output) return null;
+    return {
+      output,
+      format: field?.format ?? "text",
+      note: busy ? undefined : field?.note,
+      // Measured here rather than asked for, and only once the answer is
+      // complete — a count of a half-written line would be wrong and would
+      // flicker while it settled.
+      stats: busy || !field?.lineMetric ? undefined : measureLines(output, field.lineMetric),
+    };
+  }, [output, busy, field]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">

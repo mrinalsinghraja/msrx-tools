@@ -78,6 +78,9 @@ export async function POST(request: Request) {
       stream: true,
       temperature: built.composed.temperature,
       max_tokens: built.composed.maxTokens,
+      // Reasoning is billed against max_tokens, so this is a correctness
+      // setting, not a tuning one — see the note on Recipe.reasoningEffort.
+      reasoning_effort: built.composed.reasoningEffort,
       messages: [
         { role: "system", content: built.composed.system },
         { role: "user", content: built.composed.user },
@@ -87,18 +90,43 @@ export async function POST(request: Request) {
     const encoder = new TextEncoder();
     const out = new ReadableStream<Uint8Array>({
       async start(controller) {
+        let wrote = false;
+        let stopReason: string | null = null;
+
         try {
           for await (const chunk of stream) {
-            const text = chunk.choices[0]?.delta?.content;
-            if (text) controller.enqueue(encoder.encode(text));
+            const choice = chunk.choices[0];
+            const text = choice?.delta?.content;
+            if (choice?.finish_reason) stopReason = choice.finish_reason;
+            if (text) {
+              wrote = true;
+              controller.enqueue(encoder.encode(text));
+            }
           }
         } catch {
           // Half an answer is still useful, so the partial result stays on
           // screen and the break is marked in it rather than thrown away.
           controller.enqueue(encoder.encode("\n\n(The answer stopped early — run it again, or in smaller pieces.)"));
-        } finally {
-          controller.close();
+          wrote = true;
         }
+
+        // A stream that carried no content at all closes silently, and the
+        // workspace then shows an empty box with no error — the worst way for
+        // this to fail, because it looks like the tool ran and had nothing to
+        // say. It happens when the model spends the whole token budget
+        // reasoning before it writes, which is a real thing this model does.
+        // Say so rather than showing nothing.
+        if (!wrote) {
+          controller.enqueue(
+            encoder.encode(
+              stopReason === "length"
+                ? "The model used its whole budget working out an answer and never got to writing one. This usually means the request needs to be smaller — try shorter input, or fewer options asking for extra sections."
+                : "The model returned nothing at all. Run it again; if it keeps happening, try shortening the input.",
+            ),
+          );
+        }
+
+        controller.close();
       },
     });
 

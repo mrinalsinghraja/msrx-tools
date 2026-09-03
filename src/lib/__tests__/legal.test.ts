@@ -177,6 +177,15 @@ describe("the privacy notice matches the code", () => {
     }
   });
 
+  it("never closes an AI stream silently with nothing in it", () => {
+    // A stream that carries no content used to close with zero bytes, and the
+    // workspace showed an empty box with no error — which reads as "the tool
+    // ran and had nothing to say" rather than "it failed".
+    const route = readSource("app", "api", "ai", "route.ts");
+    expect(route).toMatch(/if \(!wrote\)/);
+    expect(route).toMatch(/reasoning_effort/);
+  });
+
   it("names the one AI-category tool that still runs on the device", () => {
     expect(allPrivacyText).toMatch(/readability checker/i);
     expect(getTool("readability-checker")?.engine).toBe("pure");
