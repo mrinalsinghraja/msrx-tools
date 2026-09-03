@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { ToolError, type OpResult } from "@/lib/engines/types";
@@ -124,6 +127,24 @@ describe("the ops", () => {
     expect(all.length).toBeGreaterThan(20);
     expect(bold.length).toBeLessThan(all.length);
     expect(bold.every((r) => /bold/i.test(r.name))).toBe(true);
+  });
+
+  it("offers exactly as many styles as the page claims", () => {
+    // The page says a number out loud, in two places. It said thirty until the
+    // duplicate rows were removed and then it said thirty about twenty-eight
+    // things, which is the kind of drift nobody notices. Read both files.
+    const count = rows(run(fancyText, "Hi")).length;
+    const spelled = ["twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty"][count - 26];
+    expect(spelled, `no spelled form for ${count} styles — extend this list`).toBeDefined();
+
+    // vitest runs from the project root, and import.meta.url is not a file URL
+    // under its transform, so resolve from cwd like the other source-reading tests.
+    const catalogue = readFileSync(join(process.cwd(), "src/lib/tools/catalog/text.ts"), "utf8");
+    const prose = readFileSync(join(process.cwd(), "src/content/tools/text.ts"), "utf8");
+    const capitalised = spelled[0].toUpperCase() + spelled.slice(1);
+
+    expect(catalogue, "the card blurb names a different number").toContain(`${capitalised} Unicode styles`);
+    expect(prose, "the intro names a different number").toContain(`all ${spelled} of them`);
   });
 
   it("never shows the same style twice", () => {

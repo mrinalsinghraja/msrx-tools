@@ -510,7 +510,7 @@ export const TEXT_TOOLS: ToolSpec[] = [
     slug: "fancy-text-generator",
     category: "text",
     title: "Fancy Text Generator",
-    short: "Thirty Unicode styles of your text at once, each ready to copy",
+    short: "Twenty-eight Unicode styles of your text at once, each ready to copy",
     keywords: [
       "fancy text generator",
       "font generator copy paste",

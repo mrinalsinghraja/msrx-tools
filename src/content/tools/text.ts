@@ -728,7 +728,7 @@ Dotted keys behave the same way: a key written as owner.name creates a nested ob
 
 That is why the result survives being pasted into a bio, a display name or a message box that has no formatting controls at all. You are not applying bold; you are typing different letters. The platform has nothing to strip.
 
-This page is the fancy text generator that shows all thirty of them at once, from the six mathematical alphabets through circled and squared letters, fullwidth forms, small capitals, superscripts, and the combining marks that draw a line through a word. Each row has its own copy button, because in practice you want one of the thirty and you want it on the clipboard.
+This page is the fancy text generator that shows all twenty-eight of them at once, from the six mathematical alphabets through circled and squared letters, fullwidth forms, small capitals, superscripts, and the combining marks that draw a line through a word. Each row has its own copy button, because in practice you want one of the twenty-eight and you want it on the clipboard.
 
 Two limitations come with the trick and both are worth knowing before you commit. A screen reader does not treat these as letters: depending on the software and its settings it will announce each one by its formal name, or pass over the whole run in silence, so a sentence written this way is not readable to a blind person. And because they are different codepoints, searching for an ordinary word will not find the styled version of it. Use them for a flourish. Do not use them for anything somebody has to read or find.`,
     steps: [
