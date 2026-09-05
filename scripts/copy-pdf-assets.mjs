@@ -71,3 +71,31 @@ for (const file of ["qpdf.js", "qpdf.wasm"]) {
 }
 
 console.log("qpdf assets copied to public/vendor/qpdf");
+
+/**
+ * onnxruntime-web's WebAssembly, for the AI background remover.
+ *
+ * The package resolves these relative to the page by default, so on a route like
+ * /image/remove-background-ai it asks for /image/ort-wasm-simd-threaded.wasm and
+ * gets Next's 404 HTML back, which fails instantiation with a content-type error
+ * rather than anything mentioning a missing file. `ort.env.wasm.wasmPaths` in
+ * src/lib/engines/segment/u2net.ts points at this directory instead.
+ *
+ * Only the non-threaded build is copied: threads need SharedArrayBuffer, which
+ * needs COOP/COEP across the whole site, which would break third-party embeds.
+ */
+// `onnxruntime-web/package.json` is not in the package's `exports` map, so the
+// trick used above for pdf.js and qpdf throws ERR_PACKAGE_PATH_NOT_EXPORTED here.
+// Resolve the entry point and walk back to the package root instead.
+const ortEntry = require.resolve("onnxruntime-web");
+const ortRoot = ortEntry.slice(0, ortEntry.lastIndexOf("onnxruntime-web") + "onnxruntime-web".length);
+const ortTarget = join(process.cwd(), "public", "vendor", "onnxruntime");
+
+rmSync(ortTarget, { recursive: true, force: true });
+mkdirSync(ortTarget, { recursive: true });
+
+for (const file of ["ort-wasm-simd-threaded.wasm", "ort-wasm-simd-threaded.mjs"]) {
+  cpSync(join(ortRoot, "dist", file), join(ortTarget, file));
+}
+
+console.log("onnxruntime assets copied to public/vendor/onnxruntime");

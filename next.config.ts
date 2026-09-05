@@ -26,6 +26,27 @@ const nextConfig: NextConfig = {
       permanent: true,
     }));
   },
+
+  /**
+   * The background-removal model and the WebAssembly that runs it are about
+   * 7.5 MB over the wire between them, and neither ever changes without its
+   * filename changing. Without an explicit header Next serves them with no
+   * caching directive, so a visitor who used the tool yesterday downloads the
+   * whole thing again today — which would make the feature feel broken on a
+   * slow connection while being technically correct.
+   */
+  async headers() {
+    return [
+      {
+        source: "/models/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/vendor/onnxruntime/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

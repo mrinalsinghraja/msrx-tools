@@ -35,6 +35,8 @@ export type EngineId =
   | "crypto"
   | "audio"
   | "video"
+  /** Subject segmentation via a model that runs on the visitor's own device. */
+  | "segment"
   | "ai";
 
 /**

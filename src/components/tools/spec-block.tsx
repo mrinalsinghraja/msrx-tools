@@ -24,6 +24,9 @@ const ENGINE_NOTE: Record<ToolSpec["engine"], string> = {
   crypto: "This tab · WebCrypto",
   audio: "This tab · audio engine",
   video: "This tab · WebCodecs",
+  // Still this tab. The model is downloaded and run here, which is the whole
+  // point of it — an AI cut-out that behaves like the offline tools beside it.
+  segment: "This tab · on-device model",
   // The only value in this table that is not "this tab", and the reason the
   // column exists at all: a visitor should be able to see where the work goes
   // without reading the page.

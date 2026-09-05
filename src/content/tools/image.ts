@@ -560,4 +560,44 @@ Save as PNG or WebP. JPEG has no alpha channel, and saving a cutout as JPEG fill
       },
     ],
   },
+
+  "remove-background-ai": {
+    intro: `A photograph of a person in a room has no single backdrop colour to key out. The wall, the furniture, the light falling across all of it — none of that can be described as one value with a tolerance around it. Separating a subject from a scene like that requires something that has learned what subjects look like.
+
+That is what runs here. U\u00B2-Net is a segmentation network trained to score every pixel on how strongly it belongs to the foreground, and it works on ordinary photographs: a person at a desk, a dog on grass, a chair against a patterned wall. Whatever it scores low is background, and out it goes. You get a PNG with the subject kept and everything behind it made transparent, or flattened onto a colour of your choosing.
+
+The unusual part is where the work happens. Hosted cutout services send your picture to their servers, and their privacy policies are about what they promise to do with it afterwards. Here the model is downloaded to your browser and the picture is examined on your own machine. There is no upload, so there is no promise to evaluate — a difference that matters for an ID photograph, a passport scan, a picture of a child, or anything from work.
+
+The price of that is a first run which fetches roughly seven megabytes of model and runtime. Your browser keeps them, so every image after the first starts immediately, and the tool then works with the network switched off entirely.
+
+Two sliders exist because no automatic mask is perfect. Tightness moves the line between subject and background when a rim of the old scene survives or an edge has been shaved off. Softness blurs the cut by a pixel or two, which is what stops a composite looking pasted on.`,
+    steps: [
+      "Drop in a photograph. Portraits, pets, products and objects with a clear subject all work; a crowd or a reflection will not.",
+      "Wait out the one-time model download on the first run. Later images skip it.",
+      "Choose transparency or a backdrop colour, then nudge tightness if a rim of the old scene survives.",
+      "Download the PNG. Transparency needs a format that carries an alpha channel, which is why there is no JPEG option here.",
+    ],
+    faq: [
+      {
+        q: "Does my photograph get uploaded anywhere?",
+        a: "No. The model file travels to your browser and the picture stays put, which is the reverse of how a hosted cutout service works. You can prove it by disconnecting from the network after the first run — the tool carries on working.",
+      },
+      {
+        q: "Why is the first run slow?",
+        a: "It is fetching about seven megabytes: the neural network itself plus the WebAssembly that executes it. Both are cached permanently by your browser afterwards, so the wait happens once rather than once per image.",
+      },
+      {
+        q: "How does this compare with a paid online remover?",
+        a: "Close on a clear subject, and behind on the hard cases. Wispy hair, glass, motion blur and overlapping people are where a much larger commercial model still wins. The compensation is that this one costs nothing, has no daily limit, and never sees your picture.",
+      },
+      {
+        q: "When should I use the flat-colour version instead?",
+        a: "Whenever the backdrop really is one shade \u2014 a logo, an icon, a screenshot, a product on a seamless sweep. Keying a known colour is instant, needs no download, and gives a cleaner edge than any model will.",
+      },
+      {
+        q: "The subject came out with a hole in it. What now?",
+        a: "Pull tightness below zero. That widens what counts as foreground and usually recovers a dark region the network read as shadow. If the picture has two subjects and only one survived, the network chose the dominant one and cannot be told otherwise.",
+      },
+    ],
+  },
 };
