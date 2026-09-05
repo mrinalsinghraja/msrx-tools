@@ -515,6 +515,7 @@ export const IMAGE_TOOLS: ToolSpec[] = [
         help: "A little softening stops the cut edge looking like it was made with scissors.",
       },
     ],
+    stage: { preview: true },
     related: ["remove-image-background", "convert-image", "compress-image"],
     icon: "Scissors",
   },

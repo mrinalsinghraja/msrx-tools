@@ -2,7 +2,7 @@
 
 import { zipSync } from "fflate";
 import { ArrowDown, ArrowUp, Download, FileIcon, Trash2, Upload } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ImageStage } from "@/components/tools/image-stage";
 import { Recorder } from "@/components/tools/recorder";
@@ -27,6 +27,13 @@ interface StagedFile extends InputFile {
   id: string;
   size: number;
 }
+
+/**
+ * Engines whose input is a picture, and so get the source pane beside the
+ * preview. Judging a cut-out means comparing it against what you started with;
+ * a PDF or an archive has nothing to show there.
+ */
+const PICTURE_ENGINES = new Set(["image", "segment"]);
 
 export function FileWorkspace({ tool }: { tool: ToolSpec }) {
   const [files, setFiles] = useState<StagedFile[]>([]);
@@ -172,14 +179,14 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
           <div
             className={cn(
               "grid gap-6",
-              tool.engine === "image" && tool.stage.preview && "lg:grid-cols-2",
+              PICTURE_ENGINES.has(tool.engine) && tool.stage.preview && "lg:grid-cols-2",
             )}
           >
             {/* The source pane is for tools whose input is a picture. Judging a
                 filter, a quality setting or a background removal means comparing
                 against what you started with. A PDF has nothing to show here,
                 so those get the preview alone. */}
-            {tool.engine === "image" ? (
+            {PICTURE_ENGINES.has(tool.engine) ? (
             <ImageStage
               tool={tool}
               file={files[0]}
@@ -307,6 +314,67 @@ export function FileWorkspace({ tool }: { tool: ToolSpec }) {
   );
 }
 
+/**
+ * What came out, on screen, before anyone commits to a download.
+ *
+ * A row saying "speaker.png · 7.00 MB" tells you the tool ran; it does not tell
+ * you whether the cut-out is any good, and on a large photograph re-running the
+ * live preview for every option change costs seconds. The output already exists
+ * in memory by this point, so showing it costs one object URL.
+ *
+ * The checkerboard is not decoration: for a transparent PNG it is the only way
+ * to tell "background removed" from "background is white".
+ */
+function useObjectUrl(file: { bytes: Uint8Array; mime: string }) {
+  const url = useMemo(
+    () => URL.createObjectURL(new Blob([file.bytes as unknown as BlobPart], { type: file.mime })),
+    [file],
+  );
+  // Object URLs are held by the document until revoked, and a large PNG re-run
+  // on every slider change would otherwise pile up for the life of the tab.
+  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  return url;
+}
+
+/** The same idea at row size, for when a run produced several files. */
+function ResultThumb({ file }: { file: { name: string; bytes: Uint8Array; mime: string } }) {
+  const url = useObjectUrl(file);
+  return (
+    <span
+      className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded border border-construction"
+      style={{
+        backgroundImage:
+          "linear-gradient(45deg,#0000000d 25%,transparent 25%),linear-gradient(-45deg,#0000000d 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#0000000d 75%),linear-gradient(-45deg,transparent 75%,#0000000d 75%)",
+        backgroundSize: "10px 10px",
+        backgroundPosition: "0 0, 0 5px, 5px -5px, -5px 0",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- blob URL, see ResultImage */}
+      <img src={url} alt="" className="size-full object-contain" />
+    </span>
+  );
+}
+
+function ResultImage({ file }: { file: { name: string; bytes: Uint8Array; mime: string } }) {
+  const url = useObjectUrl(file);
+
+  return (
+    <div
+      className="flex items-center justify-center overflow-hidden rounded-md border border-construction p-3"
+      style={{
+        backgroundImage:
+          "linear-gradient(45deg,#0000000d 25%,transparent 25%),linear-gradient(-45deg,#0000000d 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#0000000d 75%),linear-gradient(-45deg,transparent 75%,#0000000d 75%)",
+        backgroundSize: "18px 18px",
+        backgroundPosition: "0 0, 0 9px, 9px -9px, -9px 0",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- a blob URL from
+          this tab's own memory; next/image would want to fetch and optimise it. */}
+      <img src={url} alt={`Result: ${file.name}`} className="max-h-[26rem] w-auto max-w-full object-contain" />
+    </div>
+  );
+}
+
 function ResultFiles({ result }: { result: FileOpResult }) {
   function download(file: { name: string; bytes: Uint8Array; mime: string }) {
     const blob = new Blob([file.bytes as unknown as BlobPart], { type: file.mime });
@@ -356,10 +424,18 @@ function ResultFiles({ result }: { result: FileOpResult }) {
         </dl>
       ) : null}
 
+      {result.files.length === 1 && result.files[0].mime.startsWith("image/") ? (
+        <ResultImage file={result.files[0]} />
+      ) : null}
+
       <ul className="flex flex-col gap-2">
         {result.files.map((file) => (
           <li key={file.name} className="plate flex items-center gap-3 rounded-md px-3 py-2">
-            <FileIcon className="size-4 shrink-0 text-pen-new" aria-hidden />
+            {file.mime.startsWith("image/") ? (
+              <ResultThumb file={file} />
+            ) : (
+              <FileIcon className="size-4 shrink-0 text-pen-new" aria-hidden />
+            )}
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm text-graphite">{file.name}</span>
               <span className="block text-xs text-graphite-faint">{formatBytes(file.bytes.length)}</span>

@@ -1,5 +1,5 @@
 import { createCanvas, decodeImage, encodeCanvas, release } from "../image/decode";
-import type { FileOp, OutputFile } from "../file-types";
+import type { FileOp, InputFile, OutputFile } from "../file-types";
 import { stem } from "../file-types";
 import { ToolError, num, str } from "../types";
 
@@ -42,6 +42,43 @@ function parseHex(input: string, fallback: Rgb): Rgb {
   };
 }
 
+/**
+ * The last few masks, keyed by the file they came from.
+ *
+ * Inference depends on the image alone. Tightness, softness and the backdrop are
+ * all post-processing, so without this cache every nudge of a slider would spend
+ * a second or two asking the model the same question and getting the same answer.
+ * With it, the live preview re-composites in milliseconds and only a new file
+ * costs a run.
+ *
+ * Keyed on name, length and three sampled bytes rather than object identity,
+ * because the workspace hands the op a fresh InputFile each time.
+ */
+const MASK_CACHE = new Map<string, Float32Array>();
+const MASK_CACHE_LIMIT = 4;
+
+function signature(file: InputFile): string {
+  const b = file.bytes;
+  const mid = b.length >> 1;
+  return `${file.name}:${b.length}:${b[0]}:${b[mid]}:${b[b.length - 1]}`;
+}
+
+function rememberMask(key: string, mask: Float32Array) {
+  MASK_CACHE.set(key, mask);
+  // A mask is 320×320 floats — 400 KB. A handful is nothing; an unbounded map
+  // across a long session is a leak.
+  while (MASK_CACHE.size > MASK_CACHE_LIMIT) {
+    const oldest = MASK_CACHE.keys().next().value;
+    if (oldest === undefined) break;
+    MASK_CACHE.delete(oldest);
+  }
+}
+
+/** Test seam, and a way for the workspace to drop masks when files are cleared. */
+export function clearMaskCache() {
+  MASK_CACHE.clear();
+}
+
 function backgroundFor(choice: string, custom: string): Rgb | undefined {
   if (choice === "white") return { r: 255, g: 255, b: 255 };
   if (choice === "black") return { r: 0, g: 0, b: 0 };
@@ -56,41 +93,59 @@ export const removeBackgroundAi: FileOp = async (files, options, onProgress) => 
   const softness = num(options, "edgeSoftness", 1);
   const background = backgroundFor(choice, custom);
 
-  // Loading is reported as the first slice of the bar because on a cold cache it
-  // genuinely is most of the wait, and on a warm one it passes instantly.
-  const session = await loadSession((fraction, label) => onProgress?.(fraction * 0.4, label));
-
-  const inputName = session.inputNames[0];
-  const outputName = session.outputNames[0];
-  if (!inputName || !outputName) {
-    throw new ToolError("The background-removal model loaded without the inputs it should have.");
-  }
-
-  // Same wasm-only build the session was created from — importing the default
-  // entry here would pull a second copy of the runtime into the bundle.
-  const ort = await import("onnxruntime-web/wasm");
   const outputs: OutputFile[] = [];
   const kept: number[] = [];
+
+  /**
+   * Ask the model, unless this exact file has been asked about already.
+   *
+   * Deliberately lazy: when every file in the batch is cached — which is what a
+   * slider drag looks like — the model is never loaded at all, so changing an
+   * option costs nothing even on a cold session.
+   */
+  const maskFor = async (file: InputFile, bitmap: ImageBitmap): Promise<Float32Array> => {
+    const key = signature(file);
+    const hit = MASK_CACHE.get(key);
+    if (hit) return hit;
+
+    // Loading is reported as the first slice of the bar because on a cold cache
+    // it genuinely is most of the wait, and on a warm one it passes instantly.
+    const session = await loadSession((fraction, label) => onProgress?.(fraction * 0.4, label));
+    const inputName = session.inputNames[0];
+    const outputName = session.outputNames[0];
+    if (!inputName || !outputName) {
+      throw new ToolError("The background-removal model loaded without the inputs it should have.");
+    }
+
+    // Same wasm-only build the session was created from — importing the default
+    // entry here would pull a second copy of the runtime into the bundle.
+    const ort = await import("onnxruntime-web/wasm");
+
+    // Down to the square the model wants. The browser's own high-quality
+    // resample is used rather than a hand-written one: it is better, and it
+    // runs on the GPU.
+    const small = createCanvas(MODEL_SIZE, MODEL_SIZE);
+    small.context.drawImage(bitmap, 0, 0, MODEL_SIZE, MODEL_SIZE);
+    const smallPixels = small.context.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE).data;
+
+    const tensor = new ort.Tensor("float32", toModelInput(smallPixels), [1, 3, MODEL_SIZE, MODEL_SIZE]);
+    const result = await session.run({ [inputName]: tensor });
+    const raw = result[outputName]?.data as Float32Array | undefined;
+    if (!raw || raw.length !== MODEL_SIZE * MODEL_SIZE) {
+      throw new ToolError("The model returned a mask of an unexpected size.");
+    }
+
+    const mask = normaliseMask(raw);
+    rememberMask(key, mask);
+    return mask;
+  };
 
   for (const [index, file] of files.entries()) {
     const share = (step: number) => onProgress?.(0.4 + ((index + step) / files.length) * 0.6, file.name);
     const image = await decodeImage(file);
 
     try {
-      // Down to the square the model wants. The browser's own high-quality
-      // resample is used rather than a hand-written one: it is better, and it
-      // runs on the GPU.
-      const small = createCanvas(MODEL_SIZE, MODEL_SIZE);
-      small.context.drawImage(image.bitmap, 0, 0, MODEL_SIZE, MODEL_SIZE);
-      const smallPixels = small.context.getImageData(0, 0, MODEL_SIZE, MODEL_SIZE).data;
-      share(0.2);
-
-      const tensor = new ort.Tensor("float32", toModelInput(smallPixels), [1, 3, MODEL_SIZE, MODEL_SIZE]);
-      const result = await session.run({ [inputName]: tensor });
-      const raw = result[outputName]?.data as Float32Array | undefined;
-      if (!raw || raw.length !== MODEL_SIZE * MODEL_SIZE) {
-        throw new ToolError("The model returned a mask of an unexpected size.");
-      }
+      const mask = await maskFor(file, image.bitmap);
       share(0.7);
 
       // Everything from here on happens at the image's real resolution, so the
@@ -100,7 +155,7 @@ export const removeBackgroundAi: FileOp = async (files, options, onProgress) => 
       full.context.drawImage(image.bitmap, 0, 0);
       const frame = full.context.getImageData(0, 0, image.width, image.height);
 
-      let alpha = resampleMask(normaliseMask(raw), MODEL_SIZE, image.width, image.height);
+      let alpha = resampleMask(mask, MODEL_SIZE, image.width, image.height);
       alpha = applyTightness(alpha, tightness);
       alpha = featherMask(alpha, image.width, image.height, softness);
 
